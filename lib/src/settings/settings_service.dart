@@ -9,7 +9,7 @@ import 'dart:convert';
 /// you'd like to store settings on a web server, use the http package.
 class SettingsService {
   /// Loads the User's preferred ThemeMode from local or remote storage.
-  Future<ThemeMode> themeMode() async => ThemeMode.system;
+  Future<ThemeMode> themeMode() async => ThemeMode.light;
 
   /// Persists the user's preferred ThemeMode to local or remote storage.
   Future<void> updateThemeMode(ThemeMode theme) async {

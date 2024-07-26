@@ -13,6 +13,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  provider: ^6.0.0
   flutter_localizations:
     sdk: flutter
   shared_preferences: ^2.0.8

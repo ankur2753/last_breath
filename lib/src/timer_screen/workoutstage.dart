@@ -1,10 +1,11 @@
 import 'dart:async';
 
 class WorkoutStage {
+  final String id;
   final String name;
   final Duration duration;
 
-  WorkoutStage({required this.name, required this.duration});
+  WorkoutStage({required this.id, required this.name, required this.duration});
 }
 
 class WorkoutTimerService {

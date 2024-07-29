@@ -3,6 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:last_breath/src/components/workout_timer_page.dart';
 import 'package:last_breath/src/settings/settings_controller.dart';
+import 'package:last_breath/src/timer_screen/workoutCompleted.dart';
 import 'package:provider/provider.dart';
 
 /// The Widget that configures your application.
@@ -44,13 +45,30 @@ class MyApp extends StatelessWidget {
         // directory.
         onGenerateTitle: (BuildContext context) =>
             AppLocalizations.of(context)!.appTitle,
-        theme: ThemeData(),
-        darkTheme: ThemeData.dark(),
-        themeMode: settingsController.themeMode,
+        theme: ThemeData(useMaterial3: true),
+        darkTheme: ThemeData.dark(useMaterial3: true),
 
+        themeMode: settingsController.themeMode,
+        initialRoute: '/workout',
+        onGenerateRoute: (RouteSettings settings) {
+          switch (settings.name) {
+            case '/workout':
+              return MaterialPageRoute(
+                builder: (context) => const WorkoutTimerPage(),
+              );
+            case '/completed':
+              return MaterialPageRoute(
+                builder: (context) => const WorkoutCompletedPage(),
+              );
+            default:
+            // return MaterialPageRoute(
+            //   builder: (context) =>
+            //       const WorkoutTimerPage(), // Fallback route
+            // );
+          }
+        },
         // Define a function to handle named routes in order to support
         // Flutter web url navigation and deep linking.
-        home: WorkoutTimerPage(),
       );
     });
   }

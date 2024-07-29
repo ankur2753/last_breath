@@ -1,50 +1,99 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:last_breath/src/timer_screen/workoutstage.dart';
+import 'package:uuid/uuid.dart';
 
 class TimerController extends ChangeNotifier {
-  late List<WorkoutStage> _workoutStage = [
-    WorkoutStage(name: "warmup", duration: const Duration(seconds: 10)),
-    WorkoutStage(name: "chest", duration: const Duration(seconds: 100)),
-    WorkoutStage(name: "biceps", duration: const Duration(seconds: 200)),
-    WorkoutStage(name: "legs", duration: const Duration(seconds: 10)),
-    WorkoutStage(name: "pecs", duration: const Duration(seconds: 100)),
-    WorkoutStage(name: "lats", duration: const Duration(seconds: 200)),
-    WorkoutStage(name: "forearms", duration: const Duration(seconds: 10)),
-    WorkoutStage(name: "core", duration: const Duration(seconds: 100)),
-    WorkoutStage(name: "glutes", duration: const Duration(seconds: 200)),
-  ];
-  int _currentStage = 0;
-  List<WorkoutStage> get workoutList => _workoutStage;
-  WorkoutStage get currenntWorkOut => _workoutStage[currentStage];
-  bool _isTimmerRunning = false;
+  final _uuid = const Uuid();
+  List<WorkoutStage> _workoutStages = [];
+  int _currentStageIndex = 0;
+  bool _isTimerRunning = false;
+  bool _isWorkoutCompleted = false;
 
-  bool get timerState => _isTimmerRunning;
-  int get currentStage => _currentStage;
+  TimerController() {
+    loadDefaultSession();
+  }
 
-  set currentStage(int value) {
-    _currentStage = value;
-    notifyListeners();
+  List<WorkoutStage> get workoutList => _workoutStages;
+  WorkoutStage get currentWorkout => _workoutStages[_currentStageIndex];
+  bool get isTimerRunning => _isTimerRunning;
+  int get currentStageIndex => _currentStageIndex;
+  bool get isWorkoutCompleted => _isWorkoutCompleted;
+
+  set currentStageIndex(int value) {
+    if (value >= 0 && value < _workoutStages.length) {
+      _currentStageIndex = value;
+      notifyListeners();
+    }
   }
 
   void nextWorkOut() {
-    currentStage++;
-    notifyListeners();
+    if (_currentStageIndex < _workoutStages.length - 1) {
+      _currentStageIndex++;
+      notifyListeners();
+    } else {
+      endWorkout();
+      resetWorkout();
+    }
   }
 
   void toggleTimerState() {
-    _isTimmerRunning = !_isTimmerRunning;
+    _isTimerRunning = !_isTimerRunning;
     notifyListeners();
   }
 
-  void loadSession() {
-    //load the list of workout stages
-    _workoutStage = [
-      WorkoutStage(name: "warmup", duration: const Duration(seconds: 10)),
-      WorkoutStage(name: "test", duration: const Duration(seconds: 100)),
-      WorkoutStage(name: "asd", duration: const Duration(seconds: 200)),
+  void loadDefaultSession() {
+    _workoutStages = [
+      WorkoutStage(
+          id: _uuid.v4(),
+          name: "Warm-up",
+          duration: const Duration(seconds: 10)),
+      WorkoutStage(
+          id: _uuid.v4(),
+          name: "Chest",
+          duration: const Duration(seconds: 100)),
+      WorkoutStage(
+          id: _uuid.v4(),
+          name: "Biceps",
+          duration: const Duration(seconds: 200)),
+      WorkoutStage(
+          id: _uuid.v4(), name: "legs", duration: const Duration(seconds: 10)),
+      WorkoutStage(
+          id: _uuid.v4(), name: "pecs", duration: const Duration(seconds: 100)),
+      WorkoutStage(
+          id: _uuid.v4(), name: "lats", duration: const Duration(seconds: 200)),
+      WorkoutStage(
+          id: _uuid.v4(),
+          name: "forearms",
+          duration: const Duration(seconds: 10)),
+      WorkoutStage(
+          id: _uuid.v4(), name: "core", duration: const Duration(seconds: 10)),
+      WorkoutStage(
+          id: _uuid.v4(),
+          name: "glutes",
+          duration: const Duration(seconds: 20)),
+      // ... add other stages
     ];
+    _currentStageIndex = 0;
+    _isTimerRunning = false;
+    _isWorkoutCompleted = false;
     notifyListeners();
+  }
+
+  void loadCustomSession(List<WorkoutStage> stages) {
+    _workoutStages = stages;
+    _currentStageIndex = 0;
+    _isTimerRunning = false;
+    _isWorkoutCompleted = false; // Reset workout completed flag
+    notifyListeners();
+  }
+
+  void endWorkout() {
+    _isTimerRunning = false;
+    _isWorkoutCompleted = true;
+    notifyListeners();
+  }
+
+  void resetWorkout() {
+    loadDefaultSession(); // Reset to default session
   }
 }

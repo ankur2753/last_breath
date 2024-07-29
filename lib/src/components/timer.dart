@@ -5,7 +5,13 @@ import 'package:provider/provider.dart';
 
 class TimerComponent extends StatefulWidget {
   final int duration;
-  const TimerComponent({super.key, required this.duration});
+  final String workoutId;
+
+  const TimerComponent({
+    super.key,
+    required this.duration,
+    required this.workoutId,
+  });
 
   @override
   TimerComponentState createState() => TimerComponentState();
@@ -13,57 +19,80 @@ class TimerComponent extends StatefulWidget {
 
 class TimerComponentState extends State<TimerComponent> {
   late int _remainingTime;
-  late Timer _timer;
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
-    _remainingTime = widget.duration;
-    _startTimer();
+    _resetTimer();
   }
 
   @override
   void didUpdateWidget(TimerComponent oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.duration != widget.duration) {
-      _remainingTime = widget.duration;
-      _timer.cancel();
-      _startTimer();
+    if (oldWidget.duration != widget.duration ||
+        oldWidget.workoutId != widget.workoutId) {
+      _resetTimer();
     }
   }
 
   @override
   void dispose() {
-    _timer.cancel();
+    _timer?.cancel();
     super.dispose();
   }
 
+  void _resetTimer() {
+    _timer?.cancel();
+    _remainingTime = widget.duration;
+    _startTimer();
+  }
+
   void _startTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), _timerCallback);
+  }
+
+  void _timerCallback(Timer timer) {
+    final timerController =
+        Provider.of<TimerController>(context, listen: false);
+    if (timerController.isTimerRunning) {
       setState(() {
-        final timerController =
-            Provider.of<TimerController>(context, listen: false);
-        if (timerController.timerState) {
-          if (_remainingTime > 0) {
-            _remainingTime--;
-          } else {
-            _timer.cancel();
-            timerController.nextWorkOut();
-          }
+        if (_remainingTime > 0) {
+          _remainingTime--;
+        } else {
+          _timer?.cancel();
+          timerController.nextWorkOut();
         }
       });
-    });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<TimerController>(
-      builder: (context, timerController, child) {
-        return Text(
-          '${_remainingTime >= 3600 ? '${(_remainingTime ~/ 3600).toString().padLeft(2, '0')}:' : ''}${_remainingTime >= 60 ? '${((_remainingTime % 3600) ~/ 60).toString()}:' : ''}${(_remainingTime % 60).toString().padLeft(2, '0')}',
-          style: const TextStyle(fontSize: 150),
-        );
-      },
+    // Get the screen width to adjust font size
+    final screenWidth = MediaQuery.of(context).size.width;
+    final fontSize = screenWidth * 0.4; // Adjust percentage as needed
+
+    return Text(
+      _formatTime(_remainingTime),
+      style: TextStyle(fontSize: fontSize),
     );
+  }
+
+  String _formatTime(int totalSeconds) {
+    int hours = totalSeconds ~/ 3600;
+    int minutes = (totalSeconds % 3600) ~/ 60;
+    int seconds = totalSeconds % 60;
+
+    List<String> timeParts = [];
+    if (hours > 0) timeParts.add(hours.toString().padLeft(2, '0'));
+    if (hours > 0 || minutes > 0) {
+      timeParts.add(minutes.toString().padLeft(2, '0'));
+      timeParts.add(seconds.toString().padLeft(2, '0'));
+    } else {
+      timeParts.add(seconds.toString().padLeft(2, '0'));
+    }
+
+    return timeParts.join(':');
   }
 }

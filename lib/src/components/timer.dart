@@ -6,11 +6,13 @@ import 'package:provider/provider.dart';
 class TimerComponent extends StatefulWidget {
   final int duration;
   final String workoutId;
+  final Color color;
 
   const TimerComponent({
     super.key,
     required this.duration,
     required this.workoutId,
+    required this.color,
   });
 
   @override
@@ -79,7 +81,10 @@ class TimerComponentState extends State<TimerComponent> {
 
     return Text(
       text,
-      style: TextStyle(fontSize: adjustedFontSize),
+      style: TextStyle(
+          fontSize: adjustedFontSize,
+          color: widget.color,
+          decoration: TextDecoration.none),
     );
   }
 

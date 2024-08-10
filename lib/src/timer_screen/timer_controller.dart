@@ -1,34 +1,38 @@
 import 'package:flutter/material.dart';
-import 'package:last_breath/src/timer_screen/workoutstage.dart';
 import 'package:uuid/uuid.dart';
+import 'workoutstage.dart';
+import 'timer_db_service.dart';
 
 class TimerController extends ChangeNotifier {
   final _uuid = const Uuid();
   List<WorkoutStage> _workoutStages = [];
-  int _currentStageIndex = 0;
+  int currentStageIndex = 0;
   bool _isTimerRunning = false;
-  bool _isWorkoutCompleted = false;
+  bool isWorkoutCompleted = false;
 
   TimerController() {
     loadDefaultSession();
   }
 
   List<WorkoutStage> get workoutList => _workoutStages;
-  WorkoutStage get currentWorkout => _workoutStages[_currentStageIndex];
+  WorkoutStage get currentWorkout => _workoutStages[currentStageIndex];
   bool get isTimerRunning => _isTimerRunning;
-  int get currentStageIndex => _currentStageIndex;
-  bool get isWorkoutCompleted => _isWorkoutCompleted;
 
-  set currentStageIndex(int value) {
+  final WorkoutStageStorageService _storageService =
+      WorkoutStageStorageService();
+
+  List<WorkoutStage> get workoutStages => _workoutStages;
+
+  void setCurrentStageIndex(int value) {
     if (value >= 0 && value < _workoutStages.length) {
-      _currentStageIndex = value;
+      currentStageIndex = value;
       notifyListeners();
     }
   }
 
   void nextWorkOut() {
-    if (_currentStageIndex < _workoutStages.length - 1) {
-      _currentStageIndex++;
+    if (currentStageIndex < _workoutStages.length - 1) {
+      currentStageIndex++;
       notifyListeners();
     } else {
       endWorkout();
@@ -72,27 +76,43 @@ class TimerController extends ChangeNotifier {
           name: "glutes",
           duration: const Duration(seconds: 20)),
     ];
-    _currentStageIndex = 0;
+    currentStageIndex = 0;
     _isTimerRunning = false;
-    _isWorkoutCompleted = false;
+    isWorkoutCompleted = false;
     notifyListeners();
   }
 
-  void loadCustomSession(List<WorkoutStage> stages) {
-    _workoutStages = stages;
-    _currentStageIndex = 0;
+  Future<void> saveWorkout(String workoutId) async {
+    await _storageService.storeWorkout(workoutId, _workoutStages);
+  }
+
+  Future<void> loadWorkout(String workoutId) async {
+    _workoutStages = await _storageService.retrieveWorkout(workoutId);
+    currentStageIndex = 0;
     _isTimerRunning = false;
-    _isWorkoutCompleted = false;
+    isWorkoutCompleted = false;
     notifyListeners();
+  }
+
+  Future<List<String>> getAllWorkoutIds() async {
+    List<String> wokouts = await _storageService.retrieveAllWorkoutIds();
+    print(wokouts);
+    return wokouts;
+  }
+
+  Future<void> deleteWorkout(String workoutId) async {
+    await _storageService.clearWorkout(workoutId);
+  }
+
+  Future<void> deleteAllWorkouts() async {
+    await _storageService.clearAllWorkouts();
   }
 
   void endWorkout() {
-    _isTimerRunning = false;
-    _isWorkoutCompleted = true;
-    notifyListeners();
+    // Implementation for ending the workout
   }
 
   void resetWorkout() {
-    loadDefaultSession(); // Reset to default session
+    loadDefaultSession();
   }
 }

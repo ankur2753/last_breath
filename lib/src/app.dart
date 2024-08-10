@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:last_breath/src/components/workout_timer_page.dart';
+import 'package:last_breath/src/constants/colors.dart';
 import 'package:last_breath/src/home/homepage.dart';
 import 'package:last_breath/src/settings/settings_controller.dart';
 import 'package:last_breath/src/settings/settings_page.dart';
@@ -48,7 +49,7 @@ class MyApp extends StatelessWidget {
         onGenerateTitle: (BuildContext context) =>
             AppLocalizations.of(context)!.appTitle,
         theme: ThemeData(useMaterial3: true),
-        darkTheme: ThemeData.dark(useMaterial3: true),
+        darkTheme: darkTheme,
 
         themeMode: settingsController.themeMode,
         initialRoute: '/home',

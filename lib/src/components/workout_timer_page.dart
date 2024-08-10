@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:last_breath/src/components/bottom_nav.dart';
 import 'package:last_breath/src/components/timer.dart';
 import 'package:last_breath/src/settings/settings_controller.dart';
 import 'package:last_breath/src/timer_screen/timer_controller.dart';
@@ -59,8 +58,8 @@ class _WorkoutTimerPageState extends State<WorkoutTimerPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<TimerController, SettingsController>(
-      builder: (context, timerProvider, settingsController, _) {
+    return Consumer<TimerController>(
+      builder: (context, timerProvider, _) {
         return SafeArea(
           top: false,
           child: Scaffold(
@@ -72,7 +71,6 @@ class _WorkoutTimerPageState extends State<WorkoutTimerPage> {
             floatingActionButton: _buildFloatingActionButton(timerProvider),
             floatingActionButtonLocation:
                 FloatingActionButtonLocation.centerFloat,
-            bottomNavigationBar: const BottomNav(),
           ),
         );
       },
@@ -85,6 +83,7 @@ class _WorkoutTimerPageState extends State<WorkoutTimerPage> {
         TimerComponent(
           duration: timerProvider.currentWorkout.duration.inSeconds,
           workoutId: timerProvider.currentWorkout.id,
+          color: Colors.black,
         ),
         Expanded(
           child: ListView.builder(

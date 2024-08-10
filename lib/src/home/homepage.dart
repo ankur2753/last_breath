@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:last_breath/src/components/bottom_nav.dart';
+import 'package:last_breath/src/components/timer.dart';
+import 'package:last_breath/src/constants/colors.dart';
+import 'package:last_breath/src/settings/settings_page.dart';
+import 'package:last_breath/src/timer_screen/bottom_scroll_timers.dart';
+import 'package:last_breath/src/timer_screen/timer_controller.dart';
+import 'package:uuid/uuid.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -9,17 +15,9 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
-
-  static const List<Widget> _widgetOptions = <Widget>[
-    Text('Home Page Content'),
-    Text('Settings Page Content'),
-  ];
+  final TimerController _timerController = TimerController();
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
     if (index == 0) {
       Navigator.pushNamed(context, '/home');
     } else if (index == 1) {
@@ -32,7 +30,9 @@ class HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home Page'),
-        automaticallyImplyLeading: false,
+      ),
+      drawer: Drawer(
+        child: SettingsPage(),
       ),
       body: Center(
         child: Column(
@@ -40,24 +40,66 @@ class HomePageState extends State<HomePage> {
           children: <Widget>[
             ElevatedButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/workout');
+                _timerController.loadDefaultSession();
               },
-              child: Text('Go to Workout'),
+              child: Text('Load Default Session'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                var workoutUniqueID = Uuid().v4();
+                await _timerController.saveWorkout(workoutUniqueID);
+              },
+              child: Text('Save Workout'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await _timerController.loadWorkout('workout1');
+              },
+              child: Text('Load Workout'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await _timerController.deleteWorkout('workout1');
+              },
+              child: Text('Delete Workout'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await _timerController.deleteAllWorkouts();
+              },
+              child: Text('Delete All Workouts'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await _timerController.getAllWorkoutIds();
+              },
+              child: Text('Get All Workouts'),
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/settings');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const ConcentricCirclesWidget(
+                            color: redColor,
+                            circleCount: 10,
+                          )),
+                );
               },
-              child: Text('Go to Settings'),
+              child: const Text('Go to Timer Page'),
             ),
-            const SizedBox(
-                height:
-                    20), // Add some spacing between the buttons and stats section
-            const Text(
-              'User Stats',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const WorkoutListView(
+                            nextColor: redColor,
+                          )),
+                );
+              },
+              child: const Text('Go nosda'),
             ),
-            // Add your user stats widgets here
           ],
         ),
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:last_breath/src/components/bottom_nav.dart';
 import 'package:last_breath/src/components/timer.dart';
 import 'package:last_breath/src/settings/settings_controller.dart';
 import 'package:last_breath/src/timer_screen/timer_controller.dart';
@@ -63,31 +64,18 @@ class _WorkoutTimerPageState extends State<WorkoutTimerPage> {
         return SafeArea(
           top: false,
           child: Scaffold(
-            appBar: _buildAppBar(context, settingsController),
+            appBar: AppBar(
+              title: const Text('Workout Timer Page'),
+              centerTitle: true,
+            ),
             body: _buildBody(context, timerProvider),
             floatingActionButton: _buildFloatingActionButton(timerProvider),
             floatingActionButtonLocation:
                 FloatingActionButtonLocation.centerFloat,
+            bottomNavigationBar: const BottomNav(),
           ),
         );
       },
-    );
-  }
-
-  AppBar _buildAppBar(
-      BuildContext context, SettingsController settingsController) {
-    return AppBar(
-      title: const Text('Workout Timer Page'),
-      actions: [
-        IconButton(
-          onPressed: () => _toggleTheme(settingsController),
-          icon: Icon(
-            settingsController.themeMode == ThemeMode.light
-                ? Icons.nights_stay
-                : Icons.wb_sunny,
-          ),
-        ),
-      ],
     );
   }
 

@@ -32,7 +32,7 @@ class TimerController extends ChangeNotifier {
       notifyListeners();
     } else {
       endWorkout();
-      resetWorkout();
+      //resetWorkout();
     }
   }
 
@@ -71,7 +71,6 @@ class TimerController extends ChangeNotifier {
           id: _uuid.v4(),
           name: "glutes",
           duration: const Duration(seconds: 20)),
-      // ... add other stages
     ];
     _currentStageIndex = 0;
     _isTimerRunning = false;
@@ -83,7 +82,7 @@ class TimerController extends ChangeNotifier {
     _workoutStages = stages;
     _currentStageIndex = 0;
     _isTimerRunning = false;
-    _isWorkoutCompleted = false; // Reset workout completed flag
+    _isWorkoutCompleted = false;
     notifyListeners();
   }
 

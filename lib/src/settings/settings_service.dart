@@ -9,25 +9,25 @@ import 'dart:convert';
 /// you'd like to store settings on a web server, use the http package.
 class SettingsService {
   /// Loads the User's preferred ThemeMode from local or remote storage.
-  Future<ThemeMode> themeMode() async => ThemeMode.light;
+  Future<ThemeMode> themeMode() async {
+    return ThemeMode.dark;
+    final prefs = await SharedPreferences.getInstance();
+    print(prefs.containsKey("curr_theme"));
+    String? currTheme = prefs.getString("curr_theme");
+    if (currTheme?.isNotEmpty ?? false) {
+      return currTheme == ThemeMode.dark.name
+          ? ThemeMode.dark
+          : ThemeMode.light;
+    } else {
+      return ThemeMode.light;
+    }
+  }
 
   /// Persists the user's preferred ThemeMode to local or remote storage.
   Future<void> updateThemeMode(ThemeMode theme) async {
     // Use the shared_preferences package to persist settings locally or the
     // http package to persist settings over the network.
-  }
-
-  /// Saves JSON data to local storage.
-  Future<void> saveJson(String key, Map<String, dynamic> json) async {
     final prefs = await SharedPreferences.getInstance();
-    String jsonString = jsonEncode(json);
-    await prefs.setString(key, jsonString);
-  }
-
-  /// Loads JSON data from local storage.
-  Future<Map<String, dynamic>?> loadJson(String key) async {
-    final prefs = await SharedPreferences.getInstance();
-    String? jsonString = prefs.getString(key);
-    return jsonString == null ? null : jsonDecode(jsonString);
+    await prefs.setString("curr_theme", theme.name);
   }
 }

@@ -71,11 +71,15 @@ class TimerComponentState extends State<TimerComponent> {
   Widget build(BuildContext context) {
     // Get the screen width to adjust font size
     final screenWidth = MediaQuery.of(context).size.width;
-    final fontSize = screenWidth * 0.4; // Adjust percentage as needed
+    final baseFontSize = screenWidth * 0.3; // Base font size
+    final text = _formatTime(_remainingTime);
+    final adjustedFontSize = baseFontSize /
+        (text.length / 10)
+            .clamp(1.0, 2.0); // Adjust font size based on text length
 
     return Text(
-      _formatTime(_remainingTime),
-      style: TextStyle(fontSize: fontSize),
+      text,
+      style: TextStyle(fontSize: adjustedFontSize),
     );
   }
 

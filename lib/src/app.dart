@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:last_breath/src/components/workout_timer_page.dart';
+import 'package:last_breath/src/components/add_workout_page.dart';
 import 'package:last_breath/src/constants/colors.dart';
 import 'package:last_breath/src/home/homepage.dart';
 import 'package:last_breath/src/settings/settings_controller.dart';
@@ -57,7 +57,7 @@ class MyApp extends StatelessWidget {
           switch (settings.name) {
             case '/workout':
               return MaterialPageRoute(
-                builder: (context) => const WorkoutTimerPage(),
+                builder: (context) => const AddWorkout(),
               );
             case '/completed':
               return MaterialPageRoute(
@@ -67,6 +67,9 @@ class MyApp extends StatelessWidget {
               return MaterialPageRoute(
                 builder: (context) => const SettingsPage(), // Fallback route
               );
+            case '/saveWorkout':
+              return MaterialPageRoute(
+                  builder: (context) => const AddWorkout());
             case '/home':
             default:
               return MaterialPageRoute(

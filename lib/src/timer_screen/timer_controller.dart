@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:last_breath/src/constants/enums.dart';
 import 'package:uuid/uuid.dart';
 import 'workoutstage.dart';
 import 'timer_db_service.dart';
 
 class TimerController extends ChangeNotifier {
   final _uuid = const Uuid();
-  List<WorkoutStage> _workoutStages = [];
+  List<WorkoutStage> _sets = [];
   int currentStageIndex = 0;
   bool _isTimerRunning = false;
   bool isWorkoutCompleted = false;
@@ -14,24 +15,26 @@ class TimerController extends ChangeNotifier {
     loadDefaultSession();
   }
 
-  List<WorkoutStage> get workoutList => _workoutStages;
-  WorkoutStage get currentWorkout => _workoutStages[currentStageIndex];
+  List<WorkoutStage> get workoutList => _sets;
+  WorkoutStage get currentWorkout => _sets[currentStageIndex];
   bool get isTimerRunning => _isTimerRunning;
 
   final WorkoutStageStorageService _storageService =
       WorkoutStageStorageService();
 
-  List<WorkoutStage> get workoutStages => _workoutStages;
+  List<WorkoutStage> get workoutStages => _sets;
 
   void setCurrentStageIndex(int value) {
-    if (value >= 0 && value < _workoutStages.length) {
+    if (value >= 0 && value < _sets.length) {
       currentStageIndex = value;
       notifyListeners();
     }
   }
 
+  void addNewWorkout() {}
+
   void nextWorkOut() {
-    if (currentStageIndex < _workoutStages.length - 1) {
+    if (currentStageIndex < _sets.length - 1) {
       currentStageIndex++;
       notifyListeners();
     } else {
@@ -46,35 +49,23 @@ class TimerController extends ChangeNotifier {
   }
 
   void loadDefaultSession() {
-    _workoutStages = [
+    _sets = [
       WorkoutStage(
-          id: _uuid.v4(),
-          name: "Warm-up",
-          duration: const Duration(seconds: 10)),
+        type: WorkoutTypes.prepare,
+        duration: const Duration(seconds: 100),
+      ),
       WorkoutStage(
-          id: _uuid.v4(),
-          name: "Chest",
-          duration: const Duration(seconds: 100)),
+        type: WorkoutTypes.rest,
+        duration: const Duration(seconds: 100),
+      ),
       WorkoutStage(
-          id: _uuid.v4(),
-          name: "Biceps",
-          duration: const Duration(seconds: 200)),
+        type: WorkoutTypes.prepare,
+        duration: const Duration(seconds: 100),
+      ),
       WorkoutStage(
-          id: _uuid.v4(), name: "legs", duration: const Duration(seconds: 10)),
-      WorkoutStage(
-          id: _uuid.v4(), name: "pecs", duration: const Duration(seconds: 100)),
-      WorkoutStage(
-          id: _uuid.v4(), name: "lats", duration: const Duration(seconds: 200)),
-      WorkoutStage(
-          id: _uuid.v4(),
-          name: "forearms",
-          duration: const Duration(seconds: 10)),
-      WorkoutStage(
-          id: _uuid.v4(), name: "core", duration: const Duration(seconds: 10)),
-      WorkoutStage(
-          id: _uuid.v4(),
-          name: "glutes",
-          duration: const Duration(seconds: 20)),
+        type: WorkoutTypes.prepare,
+        duration: const Duration(seconds: 100),
+      ),
     ];
     currentStageIndex = 0;
     _isTimerRunning = false;
@@ -83,11 +74,11 @@ class TimerController extends ChangeNotifier {
   }
 
   Future<void> saveWorkout(String workoutId) async {
-    await _storageService.storeWorkout(workoutId, _workoutStages);
+    await _storageService.storeWorkout(workoutId, _sets);
   }
 
   Future<void> loadWorkout(String workoutId) async {
-    _workoutStages = await _storageService.retrieveWorkout(workoutId);
+    _sets = await _storageService.retrieveWorkout(workoutId);
     currentStageIndex = 0;
     _isTimerRunning = false;
     isWorkoutCompleted = false;

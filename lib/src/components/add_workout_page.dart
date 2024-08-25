@@ -5,14 +5,14 @@ import 'package:last_breath/src/timer_screen/timer_controller.dart';
 import 'package:last_breath/src/timer_screen/workoutstage.dart';
 import 'package:provider/provider.dart';
 
-class WorkoutTimerPage extends StatefulWidget {
-  const WorkoutTimerPage({super.key});
+class AddWorkout extends StatefulWidget {
+  const AddWorkout({super.key});
 
   @override
-  State<WorkoutTimerPage> createState() => _WorkoutTimerPageState();
+  State<AddWorkout> createState() => _AddWorkoutState();
 }
 
-class _WorkoutTimerPageState extends State<WorkoutTimerPage> {
+class _AddWorkoutState extends State<AddWorkout> {
   late ScrollController _scrollController;
   late TimerController _timerController;
 
@@ -64,7 +64,7 @@ class _WorkoutTimerPageState extends State<WorkoutTimerPage> {
           top: false,
           child: Scaffold(
             appBar: AppBar(
-              title: const Text('Workout Timer Page'),
+              title: const Text('Add New Workout'),
               centerTitle: true,
             ),
             body: _buildBody(context, timerProvider),
@@ -80,11 +80,6 @@ class _WorkoutTimerPageState extends State<WorkoutTimerPage> {
   Widget _buildBody(BuildContext context, TimerController timerProvider) {
     return Column(
       children: [
-        TimerComponent(
-          duration: timerProvider.currentWorkout.duration.inSeconds,
-          workoutId: timerProvider.currentWorkout.id,
-          color: Colors.black,
-        ),
         Expanded(
           child: ListView.builder(
             controller: _scrollController,
@@ -168,7 +163,7 @@ class WorkoutListItem extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  workout.name,
+                  workout.type.toString(),
                   style: textTheme.bodyMedium?.copyWith(
                     fontWeight:
                         isSelected ? FontWeight.bold : FontWeight.normal,

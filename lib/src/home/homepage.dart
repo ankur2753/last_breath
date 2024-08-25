@@ -46,8 +46,9 @@ class HomePageState extends State<HomePage> {
             ),
             ElevatedButton(
               onPressed: () async {
-                var workoutUniqueID = Uuid().v4();
-                await _timerController.saveWorkout(workoutUniqueID);
+                // var workoutUniqueID = Uuid().v4();
+                // await _timerController.saveWorkout(workoutUniqueID);
+                Navigator.pushNamed(context, "/saveWorkout");
               },
               child: Text('Save Workout'),
             ),
@@ -68,6 +69,12 @@ class HomePageState extends State<HomePage> {
                 await _timerController.deleteAllWorkouts();
               },
               child: Text('Delete All Workouts'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.pushNamed(context, '/completed');
+              },
+              child: Text('Go To workouts'),
             ),
             ElevatedButton(
               onPressed: () async {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-const Color redColor = Colors.blue;
+const Color redColor = Colors.red;
 const Color blackColor = Colors.black;
 
 final ThemeData darkTheme = ThemeData(

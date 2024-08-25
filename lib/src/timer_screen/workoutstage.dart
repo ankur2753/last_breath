@@ -1,11 +1,12 @@
 import 'dart:async';
 
+import 'package:last_breath/src/constants/enums.dart';
+
 class WorkoutStage {
-  final String id;
-  final String name;
+  final WorkoutTypes type;
   final Duration duration;
 
-  WorkoutStage({required this.id, required this.name, required this.duration});
+  WorkoutStage({required this.type, required this.duration});
 }
 
 class WorkoutTimerService {

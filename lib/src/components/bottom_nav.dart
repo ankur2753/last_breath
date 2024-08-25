@@ -85,15 +85,15 @@ class ConcentricCirclesWidget extends StatelessWidget {
       body: Stack(
         alignment: Alignment.center,
         children: [
-          CustomPaint(
-            size: const Size(double.infinity, double.infinity),
-            painter: _ConcentricCirclesPainter(color, circleCount),
-          ),
+          // CustomPaint(
+          //   size: const Size(double.infinity, double.infinity),
+          //   painter: _ConcentricCirclesPainter(color, circleCount),
+          // ),
           const Align(
             alignment: Alignment(
                 0, -0.3), // Adjust alignment to match the circle center
             child: TimerComponent(
-              duration: 100,
+              duration: 63,
               workoutId: "sadsad",
               color: redColor,
             ),

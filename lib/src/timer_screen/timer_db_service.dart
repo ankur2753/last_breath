@@ -1,67 +1,115 @@
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'workoutstage.dart';
+import 'package:sqlite3/sqlite3.dart';
+import 'package:last_breath/src/timer_screen/workoutstage.dart';
 
 class WorkoutStageStorageService {
-  static const String _workoutsKey = 'workouts';
+  static Database? _database;
 
-  Future<void> storeWorkout(String workoutId, List<WorkoutStage> stages) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+  Future<Database> get database async {
+    if (_database != null) return _database!;
+    _database = _initDatabase();
+    return _database!;
+  }
+//TODO: USE THIS TO INIT DB
+//   Future<Database> _initDatabase() async {
+//   final db = sqlite3.open('workouts.db');
+//   final schema = await File('schema.sql').readAsString();
+//   db.execute(schema);
+//   return db;
+// }
 
-    // Store the workout stages
-    final List<String> stagesJson = stages
-        .map((stage) => jsonEncode({
-              'id': stage.id,
-              'name': stage.name,
-              'duration': stage.duration.inSeconds,
-            }))
-        .toList();
-    await prefs.setStringList(workoutId, stagesJson);
+  Database _initDatabase() {
+    final db = sqlite3.open('workouts.db');
+    db.execute(
+      '''
+      CREATE TABLE IF NOT EXISTS workouts(
+        id TEXT PRIMARY KEY
+      )
+      ''',
+    );
+    db.execute(
+      '''
+      CREATE TABLE IF NOT EXISTS workout_stages(
+        workout_id TEXT,
+        stage_id TEXT,
+        name TEXT,
+        duration INTEGER,
+        PRIMARY KEY (workout_id, stage_id),
+        FOREIGN KEY (workout_id) REFERENCES workouts(id)
+      )
+      ''',
+    );
+    return db;
+  }
 
-    // Update the list of workout IDs
-    final List<String> workoutIds = prefs.getStringList(_workoutsKey) ?? [];
-    if (!workoutIds.contains(workoutId)) {
-      workoutIds.add(workoutId);
-      await prefs.setStringList(_workoutsKey, workoutIds);
+  Future<void> saveWorkout(String workoutId, List<WorkoutStage> stages) async {
+    final db = await database;
+    db.execute(
+      'INSERT OR REPLACE INTO workouts (id) VALUES (?)',
+      [workoutId],
+    );
+    for (var stage in stages) {
+      db.execute(
+        'INSERT OR REPLACE INTO workout_stages (workout_id, stage_id, name, duration) VALUES (?, ?, ?, ?)',
+        [workoutId, stage.type, stage.duration.inSeconds],
+      );
     }
   }
 
   Future<List<WorkoutStage>> retrieveWorkout(String workoutId) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final List<String>? stagesJson = prefs.getStringList(workoutId);
-    if (stagesJson == null) return [];
-
-    return stagesJson.map((stageJson) {
-      final Map<String, dynamic> stageMap = jsonDecode(stageJson);
+    final db = await database;
+    final ResultSet result = db.select(
+      'SELECT stage_id, name, duration FROM workout_stages WHERE workout_id = ?',
+      [workoutId],
+    );
+    if (result.isEmpty) return [];
+    return result.map((row) {
       return WorkoutStage(
-        id: stageMap['id'],
-        name: stageMap['name'],
-        duration: Duration(seconds: stageMap['duration']),
+        id: row['stage_id'] as String,
+        name: row['name'] as String,
+        duration: Duration(seconds: row['duration'] as int),
       );
     }).toList();
   }
 
   Future<List<String>> retrieveAllWorkoutIds() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getStringList(_workoutsKey) ?? [];
+    final db = await database;
+    final ResultSet result = db.select('SELECT id FROM workouts');
+    return result.map((row) => row['id'] as String).toList();
   }
 
   Future<void> clearWorkout(String workoutId) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove(workoutId);
-
-    // Update the list of workout IDs
-    final List<String> workoutIds = prefs.getStringList(_workoutsKey) ?? [];
-    workoutIds.remove(workoutId);
-    await prefs.setStringList(_workoutsKey, workoutIds);
+    final db = await database;
+    db.execute(
+      'DELETE FROM workout_stages WHERE workout_id = ?',
+      [workoutId],
+    );
+    db.execute(
+      'DELETE FROM workouts WHERE id = ?',
+      [workoutId],
+    );
   }
 
   Future<void> clearAllWorkouts() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final List<String> workoutIds = prefs.getStringList(_workoutsKey) ?? [];
-    for (String workoutId in workoutIds) {
-      await prefs.remove(workoutId);
+    final db = await database;
+    db.execute('DELETE FROM workout_stages');
+    db.execute('DELETE FROM workouts');
+  }
+
+  Future<void> storeWorkout(String workoutId, List<WorkoutStage> stages) async {
+    final db = await database;
+
+    // Store the workout ID in the workouts table
+    db.execute(
+      'INSERT OR REPLACE INTO workouts (id) VALUES (?)',
+      [workoutId],
+    );
+
+    // Store the workout stages in the workout_stages table
+    for (var stage in stages) {
+      db.execute(
+        'INSERT OR REPLACE INTO workout_stages (workout_id, stage_id, name, duration) VALUES (?, ?, ?, ?)',
+        [workoutId, stage.id, stage.name, stage.duration.inSeconds],
+      );
     }
-    await prefs.remove(_workoutsKey);
   }
 }

@@ -20,6 +20,8 @@ dependencies:
   uuid: ^4.4.2
   animations: ^2.0.11
   sqlite3: ^2.4.2
+  hive:
+  hive_flutter:
 
   # flutter_gen: any
 dev_dependencies:
@@ -28,6 +30,8 @@ dev_dependencies:
 
   flutter_lints: ^4.0.0
   flutter_launcher_icons: ^0.13.1
+  hive_generator:
+  build_runner:
 
 flutter_icons:
   android: true

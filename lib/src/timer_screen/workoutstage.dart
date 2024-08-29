@@ -1,18 +1,11 @@
 import 'dart:async';
 
-import 'package:last_breath/src/constants/enums.dart';
-
-class WorkoutStage {
-  final WorkoutTypes type;
-  final Duration duration;
-
-  WorkoutStage({required this.type, required this.duration});
-}
+import 'workout_model.dart';
 
 class WorkoutTimerService {
-  List<WorkoutStage> stages = [];
+  List<ExerciseInterval> stages = [];
   int currentStageIndex = 0;
-  late Timer _timer;
+  Timer? _timer;
 
   void startWorkout() {
     if (stages.isEmpty) return;
@@ -20,9 +13,9 @@ class WorkoutTimerService {
     _startStage(stages[currentStageIndex]);
   }
 
-  void _startStage(WorkoutStage stage) {
-    _timer.cancel(); // Cancel any existing timer
-    _timer = Timer(stage.duration, _nextStage);
+  void _startStage(ExerciseInterval stage) {
+    _timer?.cancel(); // Cancel any existing timer if it exists
+    _timer = Timer(Duration(seconds: stage.duration), _nextStage);
   }
 
   void _nextStage() {
@@ -35,11 +28,11 @@ class WorkoutTimerService {
     }
   }
 
-  void addStage(WorkoutStage stage) {
+  void addStage(ExerciseInterval stage) {
     stages.add(stage);
   }
 
   void cancelWorkout() {
-    _timer.cancel();
+    _timer?.cancel();
   }
 }

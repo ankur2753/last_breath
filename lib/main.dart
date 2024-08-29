@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:last_breath/src/timer_screen/timer_controller.dart';
 import 'package:provider/provider.dart';
 import 'src/app.dart';
 import 'src/settings/settings_controller.dart';
 import 'src/settings/settings_service.dart';
+import 'src/timer_screen/workout_model.dart';
 
 void main() async {
   // Set up the SettingsController, which will glue user settings to multiple
@@ -17,6 +19,13 @@ void main() async {
   // Run the app and pass in the SettingsController. The app listens to the
   // SettingsController for changes, then passes it further down to the
   // SettingsView.
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+
+  Hive.registerAdapter(IntervalAdapter());
+  Hive.registerAdapter(WorkoutPlanAdapter());
+
+  await Hive.openBox<WorkoutPlan>('workoutPlans');
   runApp(
     MultiProvider(
       providers: [

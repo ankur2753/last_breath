@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:last_breath/src/components/timer.dart';
 import 'package:last_breath/src/settings/settings_controller.dart';
 import 'package:last_breath/src/timer_screen/timer_controller.dart';
+import 'package:last_breath/src/timer_screen/workout_model.dart';
 import 'package:last_breath/src/timer_screen/workoutstage.dart';
 import 'package:provider/provider.dart';
 
@@ -124,7 +125,7 @@ class _AddWorkoutState extends State<AddWorkout> {
 }
 
 class WorkoutListItem extends StatelessWidget {
-  final WorkoutStage workout;
+  final ExerciseInterval workout;
   final bool isSelected;
   final VoidCallback onTap;
 
@@ -170,7 +171,7 @@ class WorkoutListItem extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '${workout.duration.inSeconds} seconds',
+                  '${workout.duration} seconds',
                   style: textTheme.bodyMedium,
                 ),
               ],

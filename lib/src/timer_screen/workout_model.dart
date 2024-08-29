@@ -1,49 +1,58 @@
 import 'package:hive/hive.dart';
 
-import '../constants/enums.dart';
-
 part 'workout_model.g.dart';
 
 @HiveType(typeId: 0)
-class ExerciseInterval extends HiveObject {
+enum ActionTypes {
   @HiveField(0)
-  WorkoutTypes type;
-
+  Prepare,
   @HiveField(1)
-  int duration;
-
+  Exercise,
   @HiveField(2)
-  int repeatCount;
-
-  ExerciseInterval({
-    required this.type,
-    required this.duration,
-    required this.repeatCount,
-  });
+  Rest,
 }
 
 @HiveType(typeId: 1)
-class WorkoutPlan extends HiveObject {
+class ExerciseSteps {
   @HiveField(0)
-  String id;
+  ActionTypes type;
+
+  @HiveField(1)
+  int duration; // in seconds
+
+  ExerciseSteps({required this.type, required this.duration});
+}
+
+@HiveType(typeId: 2)
+class Exercise {
+  @HiveField(0)
+  String name;
+
+  @HiveField(1)
+  List<ExerciseSteps> actions;
+
+  @HiveField(2)
+  int repeat;
+
+  Exercise({required this.name, required this.actions, required this.repeat});
+
+  int get totalDuration =>
+      actions.fold(0, (sum, action) => sum + action.duration) * repeat;
+}
+
+@HiveType(typeId: 3)
+class Workout {
+  @HiveField(0)
+  final String id;
 
   @HiveField(1)
   String name;
 
   @HiveField(2)
-  int totalDuration;
+  List<Exercise> exercises;
 
-  @HiveField(3)
-  List<ExerciseInterval> intervals;
+  Workout({required this.id, required this.name, required this.exercises});
 
-  @HiveField(4)
-  int repeatCount;
-
-  WorkoutPlan({
-    required this.id,
-    required this.name,
-    required this.totalDuration,
-    required this.intervals,
-    required this.repeatCount,
-  });
+  int get totalTime =>
+      exercises.fold(0, (sum, exercise) => sum + exercise.totalDuration);
 }

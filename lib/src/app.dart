@@ -3,10 +3,10 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:last_breath/src/components/add_workout_page.dart';
 import 'package:last_breath/src/constants/colors.dart';
-import 'package:last_breath/src/home/homepage.dart';
 import 'package:last_breath/src/settings/settings_controller.dart';
 import 'package:last_breath/src/settings/settings_page.dart';
 import 'package:last_breath/src/timer_screen/workoutCompleted.dart';
+import 'package:last_breath/src/timer_screen/workout_home_page.dart';
 import 'package:provider/provider.dart';
 
 /// The Widget that configures your application.
@@ -55,10 +55,10 @@ class MyApp extends StatelessWidget {
         initialRoute: '/home',
         onGenerateRoute: (RouteSettings settings) {
           switch (settings.name) {
-            case '/workout':
-              return MaterialPageRoute(
-                builder: (context) => const AddWorkout(),
-              );
+            // case '/workout':
+            //   return MaterialPageRoute(
+            //     builder: (context) => const AddWorkout(),
+            //   );
             case '/completed':
               return MaterialPageRoute(
                 builder: (context) => const WorkoutCompletedPage(),
@@ -67,13 +67,13 @@ class MyApp extends StatelessWidget {
               return MaterialPageRoute(
                 builder: (context) => const SettingsPage(), // Fallback route
               );
-            case '/saveWorkout':
-              return MaterialPageRoute(
-                  builder: (context) => const AddWorkout());
+            // case '/saveWorkout':
+            //   return MaterialPageRoute(
+            //       builder: (context) => const AddWorkout());
             case '/home':
             default:
               return MaterialPageRoute(
-                builder: (context) => const HomePage(), // Fallback route
+                builder: (context) => HomePage(), // Fallback route
               );
           }
         },

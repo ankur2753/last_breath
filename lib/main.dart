@@ -20,16 +20,23 @@ void main() async {
   // SettingsController for changes, then passes it further down to the
   // SettingsView.
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Hive
   await Hive.initFlutter();
 
-  Hive.registerAdapter(IntervalAdapter());
-  Hive.registerAdapter(WorkoutPlanAdapter());
+  // Register Hive Adapters
+  Hive.registerAdapter(WorkoutAdapter());
+  Hive.registerAdapter(ExerciseAdapter());
+  Hive.registerAdapter(ExerciseStepsAdapter());
+  Hive.registerAdapter(ActionTypesAdapter());
 
-  await Hive.openBox<WorkoutPlan>('workoutPlans');
+  // Open the Hive box
+  await Hive.openBox<Workout>('workouts');
+
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => TimerController()),
+        // ChangeNotifierProvider(create: (context) => TimerController()),
         ChangeNotifierProvider(create: (context) => settingsController),
       ],
       child: const MyApp(),

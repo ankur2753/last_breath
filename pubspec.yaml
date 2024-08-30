@@ -22,6 +22,7 @@ dependencies:
   sqlite3: ^2.4.2
   hive:
   hive_flutter:
+  audioplayers: ^6.1.0
 
   # flutter_gen: any
 dev_dependencies:

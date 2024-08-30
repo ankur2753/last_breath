@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'workout_model.dart';
 import 'workout_timer.dart';
 
@@ -11,19 +12,36 @@ class WorkoutTimerPage extends StatefulWidget {
   _WorkoutTimerPageState createState() => _WorkoutTimerPageState();
 }
 
-class _WorkoutTimerPageState extends State<WorkoutTimerPage> {
+class _WorkoutTimerPageState extends State<WorkoutTimerPage>
+    with WidgetsBindingObserver {
   late WorkoutTimer _workoutTimer;
+  bool _isBackgroundAudioPaused = false;
 
   @override
   void initState() {
     super.initState();
     _workoutTimer = WorkoutTimer(widget.workout);
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _workoutTimer.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      // App is in the background
+      _isBackgroundAudioPaused = true;
+      _workoutTimer.pause();
+    } else if (state == AppLifecycleState.resumed && _isBackgroundAudioPaused) {
+      // App is in the foreground again
+      _isBackgroundAudioPaused = false;
+      _workoutTimer.resume();
+    }
   }
 
   String _formatTime(int seconds) {
@@ -37,6 +55,15 @@ class _WorkoutTimerPageState extends State<WorkoutTimerPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.workout.name),
+        // actions: [
+        //   IconButton(
+        //     icon: Icon(
+        //         themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode),
+        //     onPressed: () {
+        //       themeProvider.toggleTheme();
+        //     },
+        //   ),
+        // ],
       ),
       body: StreamBuilder<TimerState>(
         stream: _workoutTimer.timerState,
@@ -46,6 +73,15 @@ class _WorkoutTimerPageState extends State<WorkoutTimerPage> {
           }
 
           final state = snapshot.data!;
+
+          if (state.countdownTime != null) {
+            return Center(
+              child: Text(
+                'Starting in ${state.countdownTime}',
+                style: Theme.of(context).textTheme.headlineLarge,
+              ),
+            );
+          }
 
           return Padding(
             padding: const EdgeInsets.all(16.0),
@@ -102,6 +138,28 @@ class _WorkoutTimerPageState extends State<WorkoutTimerPage> {
                         padding:
                             EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                         backgroundColor: Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: _workoutTimer.skipCurrentStep,
+                      child: Text('Skip Step'),
+                      style: ElevatedButton.styleFrom(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: _workoutTimer.skipCurrentExercise,
+                      child: Text('Skip Exercise'),
+                      style: ElevatedButton.styleFrom(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                       ),
                     ),
                   ],

@@ -57,19 +57,22 @@ class ExerciseAdapter extends TypeAdapter<Exercise> {
       name: fields[0] as String,
       actions: (fields[1] as List).cast<ExerciseSteps>(),
       repeat: fields[2] as int,
+      description: fields[3] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Exercise obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(4)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
       ..write(obj.actions)
       ..writeByte(2)
-      ..write(obj.repeat);
+      ..write(obj.repeat)
+      ..writeByte(3)
+      ..write(obj.description);
   }
 
   @override
@@ -97,19 +100,28 @@ class WorkoutAdapter extends TypeAdapter<Workout> {
       id: fields[0] as String,
       name: fields[1] as String,
       exercises: (fields[2] as List).cast<Exercise>(),
+      isTemplate: fields[3] as bool,
+      lastPerformed: fields[4] as DateTime?,
+      timesPerformed: fields[5] as int,
     );
   }
 
   @override
   void write(BinaryWriter writer, Workout obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
       ..write(obj.name)
       ..writeByte(2)
-      ..write(obj.exercises);
+      ..write(obj.exercises)
+      ..writeByte(3)
+      ..write(obj.isTemplate)
+      ..writeByte(4)
+      ..write(obj.lastPerformed)
+      ..writeByte(5)
+      ..write(obj.timesPerformed);
   }
 
   @override
@@ -119,6 +131,49 @@ class WorkoutAdapter extends TypeAdapter<Workout> {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is WorkoutAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+class WorkoutHistoryAdapter extends TypeAdapter<WorkoutHistory> {
+  @override
+  final int typeId = 4;
+
+  @override
+  WorkoutHistory read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return WorkoutHistory(
+      id: fields[0] as String,
+      workoutId: fields[1] as String,
+      date: fields[2] as DateTime,
+      duration: fields[3] as int,
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, WorkoutHistory obj) {
+    writer
+      ..writeByte(4)
+      ..writeByte(0)
+      ..write(obj.id)
+      ..writeByte(1)
+      ..write(obj.workoutId)
+      ..writeByte(2)
+      ..write(obj.date)
+      ..writeByte(3)
+      ..write(obj.duration);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WorkoutHistoryAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

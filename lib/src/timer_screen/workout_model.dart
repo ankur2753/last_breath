@@ -34,7 +34,15 @@ class Exercise {
   @HiveField(2)
   int repeat;
 
-  Exercise({required this.name, required this.actions, required this.repeat});
+  @HiveField(3)
+  String? description;
+
+  Exercise({
+    required this.name,
+    required this.actions,
+    required this.repeat,
+    this.description,
+  });
 
   int get totalDuration =>
       actions.fold(0, (sum, action) => sum + action.duration) * repeat;
@@ -51,8 +59,46 @@ class Workout {
   @HiveField(2)
   List<Exercise> exercises;
 
-  Workout({required this.id, required this.name, required this.exercises});
+  @HiveField(3)
+  bool isTemplate;
+
+  @HiveField(4)
+  DateTime? lastPerformed;
+
+  @HiveField(5)
+  int timesPerformed;
+
+  Workout({
+    required this.id,
+    required this.name,
+    required this.exercises,
+    this.isTemplate = false,
+    this.lastPerformed,
+    this.timesPerformed = 0,
+  });
 
   int get totalTime =>
       exercises.fold(0, (sum, exercise) => sum + exercise.totalDuration);
+}
+
+@HiveType(typeId: 4)
+class WorkoutHistory {
+  @HiveField(0)
+  final String id;
+
+  @HiveField(1)
+  final String workoutId;
+
+  @HiveField(2)
+  final DateTime date;
+
+  @HiveField(3)
+  final int duration;
+
+  WorkoutHistory({
+    required this.id,
+    required this.workoutId,
+    required this.date,
+    required this.duration,
+  });
 }

@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:flutter/services.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'workout_model.dart';
 
 class WorkoutTimer {
@@ -11,6 +13,7 @@ class WorkoutTimer {
   int _remainingTime = 0;
   bool _isRunning = false;
   Timer? _timer;
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
   StreamController<TimerState> _stateController =
       StreamController<TimerState>.broadcast();
@@ -25,9 +28,24 @@ class WorkoutTimer {
   void start() {
     if (!_isRunning) {
       _isRunning = true;
-      _timer = Timer.periodic(Duration(seconds: 1), _tick);
-      _emitState();
+      _startCountdown();
     }
+  }
+
+  void _startCountdown() {
+    int countdown = 5;
+    Timer.periodic(Duration(seconds: 1), (timer) {
+      if (countdown > 0) {
+        _playSound('countdown');
+        _emitState(countdownTime: countdown);
+        countdown--;
+      } else {
+        timer.cancel();
+        _playSound('start');
+        _timer = Timer.periodic(Duration(seconds: 1), _tick);
+        _emitState();
+      }
+    });
   }
 
   void pause() {
@@ -49,10 +67,19 @@ class WorkoutTimer {
     _emitState();
   }
 
+  Future<void> _playSound(String soundName) async {
+    String audioAsset = 'assets/sounds/$soundName.mp3';
+    await _audioPlayer.play(AssetSource(audioAsset));
+  }
+
   void _tick(Timer timer) {
     if (_remainingTime > 0) {
       _remainingTime--;
+      if (_remainingTime <= 3 && _remainingTime > 0) {
+        _playSound('countdown');
+      }
     } else {
+      _playSound('beep');
       _moveToNextStep();
     }
     _emitState();
@@ -87,12 +114,26 @@ class WorkoutTimer {
     _currentExerciseIndex = 0;
     _currentStepIndex = 0;
     _currentRepetition = 1;
-    _exercises = workout.exercises;
-    _currentExerciseSteps = _exercises[0].actions;
-    _remainingTime = _currentExerciseSteps[0].duration;
+    if (_exercises.isNotEmpty) {
+      _currentExerciseSteps = _exercises[0].actions;
+      _remainingTime = _currentExerciseSteps[0].duration;
+    } else {
+      _remainingTime = 0;
+    }
+    _isRunning = false;
   }
 
-  void _emitState() {
+  void skipCurrentExercise() {
+    _moveToNextExercise();
+    _emitState();
+  }
+
+  void skipCurrentStep() {
+    _moveToNextStep();
+    _emitState();
+  }
+
+  void _emitState({int? countdownTime}) {
     if (!_stateController.isClosed) {
       _stateController.add(TimerState(
         isRunning: _isRunning,
@@ -101,6 +142,7 @@ class WorkoutTimer {
         currentRepetition: _currentRepetition,
         remainingTime: _remainingTime,
         totalProgress: _calculateTotalProgress(),
+        countdownTime: countdownTime,
       ));
     }
   }
@@ -130,6 +172,7 @@ class WorkoutTimer {
   void dispose() {
     _timer?.cancel();
     _stateController.close();
+    _audioPlayer.dispose();
   }
 }
 
@@ -140,6 +183,7 @@ class TimerState {
   final int currentRepetition;
   final int remainingTime;
   final double totalProgress;
+  final int? countdownTime;
 
   TimerState({
     required this.isRunning,
@@ -148,5 +192,6 @@ class TimerState {
     required this.currentRepetition,
     required this.remainingTime,
     required this.totalProgress,
+    this.countdownTime,
   });
 }

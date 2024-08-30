@@ -23,15 +23,21 @@ void main() async {
 
   // Initialize Hive
   await Hive.initFlutter();
-
-  // Register Hive Adapters
-  Hive.registerAdapter(WorkoutAdapter());
-  Hive.registerAdapter(ExerciseAdapter());
-  Hive.registerAdapter(ExerciseStepsAdapter());
   Hive.registerAdapter(ActionTypesAdapter());
-
-  // Open the Hive box
-  await Hive.openBox<Workout>('workouts');
+  Hive.registerAdapter(ExerciseStepsAdapter());
+  Hive.registerAdapter(ExerciseAdapter());
+  Hive.registerAdapter(WorkoutAdapter());
+  Hive.registerAdapter(WorkoutHistoryAdapter());
+  try {
+    await Hive.openBox<Workout>('workouts');
+  } catch (e) {
+    print('Error opening workouts box: $e');
+    // Handle the error (e.g., delete the corrupted box and recreate it)
+    await Hive.deleteBoxFromDisk('workouts');
+    await Hive.openBox<Workout>('workouts');
+  }
+  // await Hive.openBox<Exercise>('exercises');
+  await Hive.openBox<WorkoutHistory>('workoutHistory');
 
   runApp(
     MultiProvider(

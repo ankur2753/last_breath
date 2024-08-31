@@ -31,7 +31,7 @@ class WorkoutTimer {
   }
 
   void _startCountdown() {
-    int countdown = 5;
+    int countdown = 0;
     Timer.periodic(Duration(seconds: 1), (timer) {
       if (countdown > 0) {
         _playSound('countdown');

@@ -39,6 +39,7 @@ class WorkoutDatabase {
   // Delete a workout
   static Future<void> deleteWorkout(String id) async {
     final box = await _openBox();
+    print("delit + $id");
     await box.delete(id);
   }
 

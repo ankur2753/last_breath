@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'workout_db_service.dart';
 import 'create_workout_page.dart';
 import 'workout_model.dart';
 import 'workout_timer_page.dart';
@@ -33,19 +34,39 @@ class HomePage extends StatelessWidget {
             itemCount: box.values.length,
             itemBuilder: (context, index) {
               final workout = box.getAt(index);
-              return ListTile(
-                title: Text(workout!.name),
-                subtitle: Text(
-                    '${workout.exercises.length} exercises - ${Duration(seconds: workout.totalTime).inMinutes} mins'),
-                trailing: workout.isTemplate ? Icon(Icons.content_copy) : null,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => WorkoutTimerPage(workout: workout),
-                    ),
+
+              return Dismissible(
+                key: Key(workout!.id), // Unique key for each item
+                direction:
+                    DismissDirection.endToStart, // Swipe from right to left
+                background: Container(
+                  color: Colors.red,
+                  alignment: Alignment.centerRight,
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Icon(Icons.delete, color: Colors.white),
+                ),
+                onDismissed: (direction) async {
+                  await box.deleteAt(index); // Delete using the database method
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('${workout.name} deleted')),
                   );
                 },
+                child: ListTile(
+                  title: Text(workout.name),
+                  subtitle: Text(
+                      '${workout.exercises.length} exercises - ${Duration(seconds: workout.totalTime).inMinutes} mins'),
+                  trailing:
+                      workout.isTemplate ? Icon(Icons.content_copy) : null,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            WorkoutTimerPage(workout: workout),
+                      ),
+                    );
+                  },
+                ),
               );
             },
           );

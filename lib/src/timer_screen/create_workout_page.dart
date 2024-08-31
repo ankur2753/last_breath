@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:uuid/uuid.dart';
 import 'workout_model.dart';
 import 'create_Exercise_Page.dart';
 
@@ -29,7 +30,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
     if (_formKey.currentState!.validate() && _exercises.isNotEmpty) {
       _formKey.currentState!.save();
       final workout = Workout(
-        id: DateTime.now().toString(), // Generate a unique ID
+        id: Uuid().v4(), // Generate a unique ID
         name: _name,
         exercises: _exercises,
       );

@@ -57,22 +57,19 @@ class ExerciseAdapter extends TypeAdapter<Exercise> {
       name: fields[0] as String,
       actions: (fields[1] as List).cast<ExerciseSteps>(),
       repeat: fields[2] as int,
-      description: fields[3] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Exercise obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(3)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
       ..write(obj.actions)
       ..writeByte(2)
-      ..write(obj.repeat)
-      ..writeByte(3)
-      ..write(obj.description);
+      ..write(obj.repeat);
   }
 
   @override

@@ -9,7 +9,6 @@ class CreateExercisePage extends StatefulWidget {
 class _CreateExercisePageState extends State<CreateExercisePage> {
   final _formKey = GlobalKey<FormState>();
   String _name = '';
-  String _description = '';
   int _duration = 30;
   int _repeat = 1;
   ActionTypes _actionType = ActionTypes.Exercise;
@@ -21,7 +20,6 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
         name: _name,
         actions: [ExerciseSteps(type: _actionType, duration: _duration)],
         repeat: _repeat,
-        description: _description,
       );
       Navigator.pop(context, exercise);
     }
@@ -41,10 +39,6 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
               validator: (value) =>
                   value!.isEmpty ? 'Please enter a name' : null,
               onSaved: (value) => _name = value!,
-            ),
-            TextFormField(
-              decoration: InputDecoration(labelText: 'Description'),
-              onSaved: (value) => _description = value!,
             ),
             DropdownButtonFormField<ActionTypes>(
               value: _actionType,

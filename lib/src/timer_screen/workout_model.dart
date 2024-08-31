@@ -34,14 +34,10 @@ class Exercise {
   @HiveField(2)
   int repeat;
 
-  @HiveField(3)
-  String? description;
-
   Exercise({
     required this.name,
     required this.actions,
     required this.repeat,
-    this.description,
   });
 
   int get totalDuration =>

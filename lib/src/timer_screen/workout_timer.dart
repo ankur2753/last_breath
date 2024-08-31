@@ -6,7 +6,6 @@ import 'workout_model.dart';
 class WorkoutTimer {
   final Workout workout;
   late List<Exercise> _exercises;
-  late List<ExerciseSteps> _currentExerciseSteps;
   int _currentExerciseIndex = 0;
   int _currentStepIndex = 0;
   int _currentRepetition = 1;
@@ -21,8 +20,7 @@ class WorkoutTimer {
 
   WorkoutTimer(this.workout) {
     _exercises = workout.exercises;
-    _currentExerciseSteps = _exercises[0].actions;
-    _remainingTime = _currentExerciseSteps[0].duration;
+    _remainingTime = _exercises[0].actions[0].duration;
   }
 
   void start() {
@@ -67,11 +65,6 @@ class WorkoutTimer {
     _emitState();
   }
 
-  Future<void> _playSound(String soundName) async {
-    String audioAsset = 'assets/sounds/$soundName.mp3';
-    await _audioPlayer.play(AssetSource(audioAsset));
-  }
-
   void _tick(Timer timer) {
     if (_remainingTime > 0) {
       _remainingTime--;
@@ -87,7 +80,7 @@ class WorkoutTimer {
 
   void _moveToNextStep() {
     _currentStepIndex++;
-    if (_currentStepIndex >= _currentExerciseSteps.length) {
+    if (_currentStepIndex >= _exercises[_currentExerciseIndex].actions.length) {
       _currentStepIndex = 0;
       _currentRepetition++;
       if (_currentRepetition > _exercises[_currentExerciseIndex].repeat) {
@@ -95,7 +88,8 @@ class WorkoutTimer {
       }
     }
     if (_currentExerciseIndex < _exercises.length) {
-      _remainingTime = _currentExerciseSteps[_currentStepIndex].duration;
+      _remainingTime =
+          _exercises[_currentExerciseIndex].actions[_currentStepIndex].duration;
     } else {
       stop(); // Workout completed
     }
@@ -105,8 +99,9 @@ class WorkoutTimer {
     _currentExerciseIndex++;
     _currentRepetition = 1;
     if (_currentExerciseIndex < _exercises.length) {
-      _currentExerciseSteps = _exercises[_currentExerciseIndex].actions;
       _currentStepIndex = 0;
+      _remainingTime =
+          _exercises[_currentExerciseIndex].actions[_currentStepIndex].duration;
     }
   }
 
@@ -115,30 +110,22 @@ class WorkoutTimer {
     _currentStepIndex = 0;
     _currentRepetition = 1;
     if (_exercises.isNotEmpty) {
-      _currentExerciseSteps = _exercises[0].actions;
-      _remainingTime = _currentExerciseSteps[0].duration;
+      _remainingTime = _exercises[0].actions[0].duration;
     } else {
       _remainingTime = 0;
     }
     _isRunning = false;
   }
 
-  void skipCurrentExercise() {
-    _moveToNextExercise();
-    _emitState();
-  }
-
-  void skipCurrentStep() {
-    _moveToNextStep();
-    _emitState();
-  }
-
   void _emitState({int? countdownTime}) {
     if (!_stateController.isClosed) {
       _stateController.add(TimerState(
         isRunning: _isRunning,
+        currentExerciseIndex: _currentExerciseIndex,
         currentExercise: _exercises[_currentExerciseIndex],
-        currentStep: _currentExerciseSteps[_currentStepIndex],
+        currentStepIndex: _currentStepIndex,
+        currentStep:
+            _exercises[_currentExerciseIndex].actions[_currentStepIndex],
         currentRepetition: _currentRepetition,
         remainingTime: _remainingTime,
         totalProgress: _calculateTotalProgress(),
@@ -160,13 +147,19 @@ class WorkoutTimer {
         (_currentRepetition - 1);
 
     for (int i = 0; i < _currentStepIndex; i++) {
-      elapsedTime += _currentExerciseSteps[i].duration;
+      elapsedTime += _exercises[_currentExerciseIndex].actions[i].duration;
     }
 
     elapsedTime +=
-        _currentExerciseSteps[_currentStepIndex].duration - _remainingTime;
+        _exercises[_currentExerciseIndex].actions[_currentStepIndex].duration -
+            _remainingTime;
 
     return elapsedTime / totalTime;
+  }
+
+  Future<void> _playSound(String soundName) async {
+    String audioAsset = 'sounds/$soundName.mp3';
+    await _audioPlayer.play(AssetSource(audioAsset));
   }
 
   void dispose() {
@@ -178,7 +171,9 @@ class WorkoutTimer {
 
 class TimerState {
   final bool isRunning;
+  final int currentExerciseIndex;
   final Exercise currentExercise;
+  final int currentStepIndex;
   final ExerciseSteps currentStep;
   final int currentRepetition;
   final int remainingTime;
@@ -187,7 +182,9 @@ class TimerState {
 
   TimerState({
     required this.isRunning,
+    required this.currentExerciseIndex,
     required this.currentExercise,
+    required this.currentStepIndex,
     required this.currentStep,
     required this.currentRepetition,
     required this.remainingTime,

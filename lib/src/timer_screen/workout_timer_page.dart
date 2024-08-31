@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'workout_model.dart';
 import 'workout_timer.dart';
 
@@ -12,36 +11,19 @@ class WorkoutTimerPage extends StatefulWidget {
   _WorkoutTimerPageState createState() => _WorkoutTimerPageState();
 }
 
-class _WorkoutTimerPageState extends State<WorkoutTimerPage>
-    with WidgetsBindingObserver {
+class _WorkoutTimerPageState extends State<WorkoutTimerPage> {
   late WorkoutTimer _workoutTimer;
-  bool _isBackgroundAudioPaused = false;
 
   @override
   void initState() {
     super.initState();
     _workoutTimer = WorkoutTimer(widget.workout);
-    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
     _workoutTimer.dispose();
     super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused) {
-      // App is in the background
-      _isBackgroundAudioPaused = true;
-      _workoutTimer.pause();
-    } else if (state == AppLifecycleState.resumed && _isBackgroundAudioPaused) {
-      // App is in the foreground again
-      _isBackgroundAudioPaused = false;
-      _workoutTimer.resume();
-    }
   }
 
   String _formatTime(int seconds) {
@@ -53,125 +35,137 @@ class _WorkoutTimerPageState extends State<WorkoutTimerPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.workout.name),
-        // actions: [
-        //   IconButton(
-        //     icon: Icon(
-        //         themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode),
-        //     onPressed: () {
-        //       themeProvider.toggleTheme();
-        //     },
-        //   ),
-        // ],
-      ),
-      body: StreamBuilder<TimerState>(
-        stream: _workoutTimer.timerState,
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return Center(child: CircularProgressIndicator());
-          }
-
-          final state = snapshot.data!;
-
-          if (state.countdownTime != null) {
-            return Center(
-              child: Text(
-                'Starting in ${state.countdownTime}',
-                style: Theme.of(context).textTheme.headlineLarge,
-              ),
-            );
-          }
-
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  state.currentExercise.name,
-                  style: Theme.of(context).textTheme.headlineMedium,
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 20),
-                Text(
-                  state.currentStep.type.toString().split('.').last,
-                  style: Theme.of(context).textTheme.headlineMedium,
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 40),
-                Text(
-                  _formatTime(state.remainingTime),
-                  style: Theme.of(context).textTheme.headlineMedium,
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 20),
-                Text(
-                  'Repetition: ${state.currentRepetition}',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 40),
-                LinearProgressIndicator(
-                  value: state.totalProgress,
-                  minHeight: 10,
-                ),
-                SizedBox(height: 40),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton(
-                      onPressed: state.isRunning
-                          ? _workoutTimer.pause
-                          : _workoutTimer.resume,
-                      child: Text(state.isRunning ? 'Pause' : 'Resume'),
-                      style: ElevatedButton.styleFrom(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed: _workoutTimer.stop,
-                      child: Text('Stop'),
-                      style: ElevatedButton.styleFrom(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                        backgroundColor: Colors.red,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton(
-                      onPressed: _workoutTimer.skipCurrentStep,
-                      child: Text('Skip Step'),
-                      style: ElevatedButton.styleFrom(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed: _workoutTimer.skipCurrentExercise,
-                      child: Text('Skip Exercise'),
-                      style: ElevatedButton.styleFrom(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+      backgroundColor: Colors.grey[900],
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: StreamBuilder<TimerState>(
+            stream: _workoutTimer.timerState,
+            initialData: TimerState(
+              isRunning: false,
+              currentExerciseIndex: 0,
+              currentExercise: widget.workout.exercises[0],
+              currentStepIndex: 0,
+              currentStep: widget.workout.exercises[0].actions[0],
+              currentRepetition: 1,
+              remainingTime: widget.workout.exercises[0].actions[0].duration,
+              totalProgress: 0.0,
             ),
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _workoutTimer.start,
-        child: Icon(Icons.play_arrow),
+            builder: (context, snapshot) {
+              final state = snapshot.data!;
+              return Column(
+                children: [
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: widget.workout.exercises.length,
+                      itemBuilder: (context, index) {
+                        final exercise = widget.workout.exercises[index];
+                        final isCurrentExercise =
+                            index == state.currentExerciseIndex;
+                        return Card(
+                          color: Colors.grey[800],
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              children: [
+                                ...exercise.actions
+                                    .asMap()
+                                    .entries
+                                    .map((entry) {
+                                  final actionIndex = entry.key;
+                                  final action = entry.value;
+                                  final isCurrentStep = isCurrentExercise &&
+                                      actionIndex == state.currentStepIndex;
+                                  return Container(
+                                    margin: EdgeInsets.only(bottom: 8),
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 8),
+                                    decoration: BoxDecoration(
+                                      color: action.type == ActionTypes.Exercise
+                                          ? Colors.green
+                                          : Colors.red,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                            action.type == ActionTypes.Exercise
+                                                ? 'Work'
+                                                : 'Rest',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold)),
+                                        Text(
+                                            isCurrentStep
+                                                ? _formatTime(
+                                                    state.remainingTime)
+                                                : _formatTime(action.duration),
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold)),
+                                      ],
+                                    ),
+                                  );
+                                }).toList(),
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[700],
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text('Repeat',
+                                          style:
+                                              TextStyle(color: Colors.white)),
+                                      Text(
+                                          isCurrentExercise
+                                              ? '${state.currentRepetition}/${exercise.repeat}'
+                                              : 'x${exercise.repeat}',
+                                          style:
+                                              TextStyle(color: Colors.white)),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      FloatingActionButton(
+                        onPressed: state.isRunning
+                            ? _workoutTimer.pause
+                            : _workoutTimer.start,
+                        child: Icon(
+                            state.isRunning ? Icons.pause : Icons.play_arrow),
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.grey[900],
+                      ),
+                      Text(
+                        _formatTime(state.remainingTime),
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 48,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
       ),
     );
   }

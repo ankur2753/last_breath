@@ -77,8 +77,8 @@ class _WorkoutTimerPageState extends State<WorkoutTimerPage> {
                                   final isCurrentStep = isCurrentExercise &&
                                       actionIndex == state.currentStepIndex;
                                   return Container(
-                                    margin: EdgeInsets.only(bottom: 8),
-                                    padding: EdgeInsets.symmetric(
+                                    margin: const EdgeInsets.only(bottom: 8),
+                                    padding: const EdgeInsets.symmetric(
                                         horizontal: 16, vertical: 8),
                                     decoration: BoxDecoration(
                                       color: action.type == ActionTypes.Exercise
@@ -90,11 +90,8 @@ class _WorkoutTimerPageState extends State<WorkoutTimerPage> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text(
-                                            action.type == ActionTypes.Exercise
-                                                ? 'Work'
-                                                : 'Rest',
-                                            style: TextStyle(
+                                        Text(action.type.name,
+                                            style: const TextStyle(
                                                 color: Colors.white,
                                                 fontWeight: FontWeight.bold)),
                                         Text(
@@ -102,7 +99,7 @@ class _WorkoutTimerPageState extends State<WorkoutTimerPage> {
                                                 ? _formatTime(
                                                     state.remainingTime)
                                                 : _formatTime(action.duration),
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                                 color: Colors.white,
                                                 fontWeight: FontWeight.bold)),
                                       ],
@@ -110,7 +107,7 @@ class _WorkoutTimerPageState extends State<WorkoutTimerPage> {
                                   );
                                 }).toList(),
                                 Container(
-                                  padding: EdgeInsets.symmetric(
+                                  padding: const EdgeInsets.symmetric(
                                       horizontal: 16, vertical: 8),
                                   decoration: BoxDecoration(
                                     color: Colors.grey[700],
@@ -120,15 +117,15 @@ class _WorkoutTimerPageState extends State<WorkoutTimerPage> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text('Repeat',
+                                      const Text('Repeat',
                                           style:
                                               TextStyle(color: Colors.white)),
                                       Text(
                                           isCurrentExercise
                                               ? '${state.currentRepetition}/${exercise.repeat}'
                                               : 'x${exercise.repeat}',
-                                          style:
-                                              TextStyle(color: Colors.white)),
+                                          style: const TextStyle(
+                                              color: Colors.white)),
                                     ],
                                   ),
                                 ),
@@ -139,7 +136,7 @@ class _WorkoutTimerPageState extends State<WorkoutTimerPage> {
                       },
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -154,7 +151,7 @@ class _WorkoutTimerPageState extends State<WorkoutTimerPage> {
                       ),
                       Text(
                         _formatTime(state.remainingTime),
-                        style: TextStyle(
+                        style: const TextStyle(
                             color: Colors.white,
                             fontSize: 48,
                             fontWeight: FontWeight.bold),

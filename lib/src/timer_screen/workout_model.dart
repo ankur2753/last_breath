@@ -12,6 +12,12 @@ enum ActionTypes {
   Rest,
 }
 
+extension ParseToString on ActionTypes {
+  String toShortString() {
+    return this.toString().split('.').last;
+  }
+}
+
 @HiveType(typeId: 1)
 class ExerciseSteps {
   @HiveField(0)

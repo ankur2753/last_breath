@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:last_breath/src/settings/settings_controller.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_dnd/flutter_dnd.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -28,12 +29,11 @@ class SettingsPage extends StatelessWidget {
               },
             ),
             ListTile(
-              title: const Text('Allow notifications'),
+              title: const Text('In-App Sound'),
               trailing: Switch(
-                value: settingsProvider.themeMode == ThemeMode.dark,
+                value: settingsProvider.isAudioEnabled,
                 onChanged: (value) {
-                  settingsProvider.updateThemeMode(
-                      value ? ThemeMode.dark : ThemeMode.light);
+                  settingsProvider.toggleAudio();
                 },
               ),
             ),

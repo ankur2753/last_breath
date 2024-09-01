@@ -86,7 +86,7 @@
 //             itemCount: timerProvider.exercises.length,
 //             itemBuilder: (context, index) {
 //               final exercise = timerProvider.exercises[index];
-//               return ExerciseListItem(
+//               return `ExerciseListItem(
 //                 exercise: exercise,
 //                 isSelected: timerProvider.currentExerciseIndex == index,
 //                 onTap: () {

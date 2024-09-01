@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/services.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'workout_model.dart';
 

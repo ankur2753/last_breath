@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dnd/flutter_dnd.dart';
 
 import 'settings_service.dart';
+import 'package:last_breath/src/timer_screen/timer_controller.dart';
 
 /// A class that many Widgets can interact with to read user settings, update
 /// user settings, or listen to user settings changes.
@@ -17,15 +19,23 @@ class SettingsController with ChangeNotifier {
   // also persisting the changes with the SettingsService.
   late ThemeMode _themeMode;
 
+  bool _enableAudio = true;
   // Allow Widgets to read the user's preferred ThemeMode.
   ThemeMode get themeMode => _themeMode;
+
+  Future<void> toggleAudio() async {
+    _enableAudio = !_enableAudio;
+    notifyListeners();
+  }
+
+  bool get isAudioEnabled => _enableAudio;
 
   /// Load the user's settings from the SettingsService. It may load from a
   /// local database or the internet. The controller only knows it can load the
   /// settings from the service.
   Future<void> loadSettings() async {
     _themeMode = await _settingsService.themeMode();
-
+    // _enableAudio = await FlutterDnd.isNotificationPolicyAccessGranted ?? false;
     // Important! Inform listeners a change has occurred.
     notifyListeners();
   }

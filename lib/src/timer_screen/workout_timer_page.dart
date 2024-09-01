@@ -35,7 +35,6 @@ class _WorkoutTimerPageState extends State<WorkoutTimerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[900],
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -65,7 +64,7 @@ class _WorkoutTimerPageState extends State<WorkoutTimerPage> {
                         return Card(
                           color: Colors.grey[800],
                           child: Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.all(10.0),
                             child: Column(
                               children: [
                                 ...exercise.actions
@@ -107,12 +106,6 @@ class _WorkoutTimerPageState extends State<WorkoutTimerPage> {
                                   );
                                 }).toList(),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[700],
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
                                   child: Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
@@ -144,17 +137,15 @@ class _WorkoutTimerPageState extends State<WorkoutTimerPage> {
                         onPressed: state.isRunning
                             ? _workoutTimer.pause
                             : _workoutTimer.start,
-                        child: Icon(
-                            state.isRunning ? Icons.pause : Icons.play_arrow),
                         backgroundColor: Colors.white,
                         foregroundColor: Colors.grey[900],
+                        child: Icon(
+                            state.isRunning ? Icons.pause : Icons.play_arrow),
                       ),
                       Text(
                         _formatTime(state.remainingTime),
                         style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 48,
-                            fontWeight: FontWeight.bold),
+                            fontSize: 48, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),

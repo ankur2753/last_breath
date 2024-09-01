@@ -4,6 +4,9 @@ import 'package:uuid/uuid.dart';
 import 'workout_model.dart';
 import 'create_Exercise_Page.dart';
 
+/*
+* THIS REUSABLE PAGE FOR CREATING AND EDITING A WORKOUT AS A WHOLE
+* */
 class CreateWorkoutPage extends StatefulWidget {
   @override
   _CreateWorkoutPageState createState() => _CreateWorkoutPageState();
@@ -36,10 +39,13 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
       );
       final box = Hive.box<Workout>('workouts');
       box.add(workout);
-      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Workout Saved')),
+      );
+    Navigator.pop(context);
     } else if (_exercises.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please add at least one exercise')),
+       const SnackBar(content: Text('Please add at least one exercise')),
       );
     }
   }

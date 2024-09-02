@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:last_breath/src/constants/svg_strings.dart';
+import 'package:last_breath/src/constants/strings_values.dart';
 import 'package:last_breath/src/settings/settings_page.dart';
 import 'workout_db_service.dart';
 import 'create_workout_page.dart';
@@ -9,10 +9,6 @@ import 'workout_model.dart';
 import 'workout_timer_page.dart';
 import 'workout_history_page.dart';
 
-/*
-* THIS PAGE IS THE PLACE TO DO CRUD OPERATIONS ON A WORKOUT
-* DOES NOT CONTAINS FUNCTIONALITY RELATED TO ACTUALLY RUNNING THE TIMERS
-* */
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -51,17 +47,8 @@ class HomePage extends StatelessWidget {
               final workout = box.getAt(index);
 
               return Dismissible(
-                key: Key(workout!.id), // Unique key for each item
-                direction: DismissDirection.horizontal, //
-                secondaryBackground: Container(
-                  color: Colors.red,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  alignment: Alignment.centerRight,
-                  child: const Icon(
-                    Icons.delete,
-                    color: Colors.white,
-                  ),
-                ), // Swipe from right to left
+                key: Key(workout!.id),
+                direction: DismissDirection.horizontal,
                 background: Container(
                   color: Colors.blueAccent,
                   alignment: Alignment.centerLeft,
@@ -71,17 +58,30 @@ class HomePage extends StatelessWidget {
                     color: Colors.white,
                   ),
                 ),
+                secondaryBackground: Container(
+                  color: Colors.red,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  alignment: Alignment.centerRight,
+                  child: const Icon(
+                    Icons.delete,
+                    color: Colors.white,
+                  ),
+                ),
                 onDismissed: (direction) async {
                   if (direction == DismissDirection.endToStart) {
-                    await box
-                        .deleteAt(index); // Delete using the database method
+                    // Delete workout
+                    await box.deleteAt(index);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('${workout.name} deleted')),
                     );
                   } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('navigate to edit here')));
-                    //navigate to edit page here
+                    // Edit workout
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CreateWorkoutPage(),
+                      ),
+                    );
                   }
                 },
                 child: ListTile(
@@ -106,6 +106,7 @@ class HomePage extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: fabHeroTag,
         onPressed: () {
           Navigator.push(
             context,

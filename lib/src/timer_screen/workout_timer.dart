@@ -29,6 +29,10 @@ class WorkoutTimer {
     }
   }
 
+  void skipToNextExercise() {
+    _currentExerciseIndex++;
+  }
+
   void _startCountdown() {
     int countdown = 0;
     Timer.periodic(Duration(seconds: 1), (timer) {

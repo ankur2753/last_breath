@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:last_breath/src/components/expandable_fab.dart';
 import 'package:uuid/uuid.dart';
 import 'workout_model.dart';
 import 'create_Exercise_Page.dart';
@@ -42,10 +43,10 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Workout Saved')),
       );
-    Navigator.pop(context);
+      Navigator.pop(context);
     } else if (_exercises.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-       const SnackBar(content: Text('Please add at least one exercise')),
+        const SnackBar(content: Text('Please add at least one exercise')),
       );
     }
   }
@@ -68,8 +69,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
             SizedBox(height: 20),
             Text('Exercises:', style: Theme.of(context).textTheme.titleLarge),
             ..._exercises.map((exercise) => ListTile(
-                  title: Text(exercise.name),
-                  subtitle: Text('${exercise.actions.length} steps'),
+                  title: Text('${exercise.actions.length} steps'),
                 )),
             ElevatedButton(
               onPressed: _addExercise,
@@ -78,10 +78,20 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: _saveWorkout,
-              child: Text('Save Workout'),
+              child: Text('Add Workout'),
             ),
           ],
         ),
+      ),
+      floatingActionButton: ExpandableFab(
+        fabs: [
+          FloatingActionButton(onPressed: () {}, child: const Icon(Icons.add)),
+          FloatingActionButton(onPressed: () {}, child: const Icon(Icons.edit)),
+        ],
+        labels: const [
+          'Add',
+          'Edit',
+        ],
       ),
     );
   }

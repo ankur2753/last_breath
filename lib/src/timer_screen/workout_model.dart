@@ -31,8 +31,8 @@ class ExerciseSteps {
 
 @HiveType(typeId: 2)
 class Exercise {
-  @HiveField(0)
-  String name;
+  // @HiveField(0)
+  // String name;
 
   @HiveField(1)
   List<ExerciseSteps> actions;
@@ -41,7 +41,7 @@ class Exercise {
   int repeat;
 
   Exercise({
-    required this.name,
+    // required this.name,
     required this.actions,
     required this.repeat,
   });

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:last_breath/src/constants/strings_values.dart';
+import '../components/common_utils.dart';
+import '../components/timer.dart';
 import 'workout_model.dart';
 import 'workout_timer.dart';
 
@@ -24,12 +27,6 @@ class _WorkoutTimerPageState extends State<WorkoutTimerPage> {
   void dispose() {
     _workoutTimer.dispose();
     super.dispose();
-  }
-
-  String _formatTime(int seconds) {
-    int minutes = seconds ~/ 60;
-    int remainingSeconds = seconds % 60;
-    return '${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
   }
 
   @override
@@ -95,9 +92,9 @@ class _WorkoutTimerPageState extends State<WorkoutTimerPage> {
                                                 fontWeight: FontWeight.bold)),
                                         Text(
                                             isCurrentStep
-                                                ? _formatTime(
+                                                ? formatTime(
                                                     state.remainingTime)
-                                                : _formatTime(action.duration),
+                                                : formatTime(action.duration),
                                             style: const TextStyle(
                                                 color: Colors.white,
                                                 fontWeight: FontWeight.bold)),
@@ -134,16 +131,21 @@ class _WorkoutTimerPageState extends State<WorkoutTimerPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       FloatingActionButton(
-                        onPressed: state.isRunning
-                            ? _workoutTimer.pause
-                            : _workoutTimer.start,
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.grey[900],
+                        heroTag: fabHeroTag,
+                        onPressed: () => {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  WorkoutCountdownPage(workout: widget.workout),
+                            ),
+                          )
+                        },
                         child: Icon(
                             state.isRunning ? Icons.pause : Icons.play_arrow),
                       ),
                       Text(
-                        _formatTime(state.remainingTime),
+                        formatTime(widget.workout.totalTime),
                         style: const TextStyle(
                             fontSize: 48, fontWeight: FontWeight.bold),
                       ),

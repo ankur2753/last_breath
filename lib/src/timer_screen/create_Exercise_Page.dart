@@ -17,11 +17,7 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
   final _formKey = GlobalKey<FormState>();
   int _repeat = 1;
   int _duration = 10;
-  String _exerciseName = "";
   List<ExerciseSteps> _actions = [];
-  TextEditingController _controller = TextEditingController();
-  String? _currentActionName;
-  int _currentDuration = 30;
   ActionTypes _currentActionType = ActionTypes.Exercise;
 
   void _addAction() {
@@ -30,13 +26,8 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
       setState(() {
         _actions.add(ExerciseSteps(
           type: _currentActionType,
-          duration: _currentDuration,
+          duration: _duration,
         ));
-        // Reset to default or user-specified values after adding
-        _currentDuration =
-            30; // Optional: Reset duration field to default or keep it as it is
-        _currentActionType =
-            ActionTypes.Exercise; // Optional: Reset action type
       });
     }
   }
@@ -56,7 +47,6 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
         color: CupertinoColors.systemBackground.resolveFrom(context),
         // Use a SafeArea widget to avoid system overlaps.
         child: SafeArea(
-          top: false,
           child: child,
         ),
       ),
@@ -67,7 +57,7 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
     if (_formKey.currentState!.validate() && _actions.isNotEmpty) {
       _formKey.currentState!.save();
       final exercise = Exercise(
-        name: _exerciseName,
+        // name: _exerciseName,
         actions: _actions,
         repeat: _repeat,
       );
@@ -88,19 +78,18 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
         child: ListView(
           padding: const EdgeInsets.all(16.0),
           children: [
-            TextField(
-              controller: _controller,
-              decoration: const InputDecoration(
-                labelText: "Exercise Name",
-                border: InputBorder.none,
-              ),
-              onChanged: (value) => setState(() => _exerciseName = value),
-            ),
+            // TextField(
+            //   controller: _controller,
+            //   decoration: const InputDecoration(
+            //     labelText: "Exercise Name",
+            //     border: InputBorder.none,
+            //   ),
+            //   onChanged: (value) => setState(() => _exerciseName = value),
+            // ),
             // Text(
             //   'Add Actions',
             //   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             // ),
-            const Divider(),
 
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -129,11 +118,20 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
                 const Text("Duration (in seconds)"),
                 TextButton(
                   onPressed: () => _showPicker(
-                    NumberPicker(
-                      minValue: 1,
-                      maxValue: 60,
-                      value: _duration,
-                      onChanged: (value) => setState(() => _duration = value),
+                    CupertinoPicker(
+                      itemExtent: 50,
+                      onSelectedItemChanged: (value) =>
+                          setState(() => _duration = value),
+                      children: List<Widget>.generate(200, (index) {
+                        return Center(
+                          child: Text(
+                            (index + 1)
+                                .toString(), // Display numbers from 1 to 60
+                            style: const TextStyle(
+                                fontSize: 20), // Customize text style as needed
+                          ),
+                        );
+                      }),
                     ),
                   ),
                   child: Text(_duration.toString()),
@@ -146,12 +144,23 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
                 const Text("Repeat (in seconds)"),
                 TextButton(
                     onPressed: () => _showPicker(
-                          NumberPicker(
-                              minValue: 0,
-                              maxValue: 100,
-                              value: _repeat,
-                              onChanged: (value) =>
-                                  setState(() => _repeat = value)),
+                          CupertinoPicker(
+                            itemExtent: 50,
+                            onSelectedItemChanged: (value) =>
+                                setState(() => _repeat = value),
+                            looping: true,
+                            children: List<Widget>.generate(60, (index) {
+                              return Center(
+                                child: Text(
+                                  (index + 1)
+                                      .toString(), // Display numbers from 1 to 60
+                                  style: const TextStyle(
+                                      fontSize:
+                                          20), // Customize text style as needed
+                                ),
+                              );
+                            }),
+                          ),
                         ),
                     child: Text(_repeat.toString()))
               ],

@@ -54,7 +54,6 @@ class ExerciseAdapter extends TypeAdapter<Exercise> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return Exercise(
-      name: fields[0] as String,
       actions: (fields[1] as List).cast<ExerciseSteps>(),
       repeat: fields[2] as int,
     );
@@ -63,9 +62,7 @@ class ExerciseAdapter extends TypeAdapter<Exercise> {
   @override
   void write(BinaryWriter writer, Exercise obj) {
     writer
-      ..writeByte(3)
-      ..writeByte(0)
-      ..write(obj.name)
+      ..writeByte(2)
       ..writeByte(1)
       ..write(obj.actions)
       ..writeByte(2)

@@ -178,12 +178,12 @@ class WorkoutDatabase {
   }
 
   // Get workouts with a specific exercise
-  static Future<List<Workout>> getWorkoutsWithExercise(
-      String exerciseName) async {
-    final workouts = await getAllWorkouts();
-    return workouts
-        .where((workout) => workout.exercises.any((exercise) =>
-            exercise.name.toLowerCase() == exerciseName.toLowerCase()))
-        .toList();
-  }
+  // static Future<List<Workout>> getWorkoutsWithExercise(
+  //     String exerciseName) async {
+  //   final workouts = await getAllWorkouts();
+  //   return workouts
+  //       .where((workout) => workout.exercises.any((exercise) =>
+  //           exercise.name.toLowerCase() == exerciseName.toLowerCase()))
+  //       .toList();
+  // }
 }

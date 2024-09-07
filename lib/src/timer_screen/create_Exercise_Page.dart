@@ -1,8 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:last_breath/src/constants/colors.dart';
-import 'package:numberpicker/numberpicker.dart';
-import 'package:uuid/v4.dart';
 import 'workout_model.dart';
 
 /*
@@ -15,8 +12,8 @@ class CreateExercisePage extends StatefulWidget {
 
 class _CreateExercisePageState extends State<CreateExercisePage> {
   final _formKey = GlobalKey<FormState>();
-  int _repeat = 1;
-  int _duration = 10;
+  int _repeat = 0;
+  int _duration = 1;
   List<ExerciseSteps> _actions = [];
   ActionTypes _currentActionType = ActionTypes.Exercise;
 
@@ -72,7 +69,7 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Create Exercise')),
+      appBar: AppBar(title: const Text('Create Exercise Set')),
       body: Form(
         key: _formKey,
         child: ListView(
@@ -121,7 +118,7 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
                     CupertinoPicker(
                       itemExtent: 50,
                       onSelectedItemChanged: (value) =>
-                          setState(() => _duration = value),
+                          setState(() => _duration = value + 1),
                       children: List<Widget>.generate(200, (index) {
                         return Center(
                           child: Text(
@@ -141,7 +138,7 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text("Repeat (in seconds)"),
+                const Text("Repeat"),
                 TextButton(
                     onPressed: () => _showPicker(
                           CupertinoPicker(
@@ -152,7 +149,7 @@ class _CreateExercisePageState extends State<CreateExercisePage> {
                             children: List<Widget>.generate(60, (index) {
                               return Center(
                                 child: Text(
-                                  (index + 1)
+                                  index
                                       .toString(), // Display numbers from 1 to 60
                                   style: const TextStyle(
                                       fontSize:

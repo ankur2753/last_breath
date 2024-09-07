@@ -1,5 +1,8 @@
 import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:last_breath/src/settings/settings_controller.dart';
+import 'package:provider/provider.dart';
 import 'workout_model.dart';
 
 class WorkoutTimer {
@@ -12,12 +15,13 @@ class WorkoutTimer {
   bool _isRunning = false;
   Timer? _timer;
   final AudioPlayer _audioPlayer = AudioPlayer();
+  BuildContext context;
 
   StreamController<TimerState> _stateController =
       StreamController<TimerState>.broadcast();
   Stream<TimerState> get timerState => _stateController.stream;
 
-  WorkoutTimer(this.workout) {
+  WorkoutTimer(this.workout, this.context) {
     _exercises = workout.exercises;
     _remainingTime = _exercises[0].actions[0].duration;
   }
@@ -31,6 +35,7 @@ class WorkoutTimer {
 
   void skipToNextExercise() {
     _currentExerciseIndex++;
+    _emitState();
   }
 
   void _startCountdown() {
@@ -161,8 +166,11 @@ class WorkoutTimer {
   }
 
   Future<void> _playSound(String soundName) async {
-    String audioAsset = 'sounds/$soundName.mp3';
-    await _audioPlayer.play(AssetSource(audioAsset));
+    if (Provider.of<SettingsController>(context, listen: false)
+        .isAudioEnabled) {
+      String audioAsset = 'sounds/$soundName.mp3';
+      await _audioPlayer.play(AssetSource(audioAsset));
+    }
   }
 
   void dispose() {

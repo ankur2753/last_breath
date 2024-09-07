@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:last_breath/src/constants/strings_values.dart';
 import '../timer_screen/workout_model.dart';
 import '../timer_screen/workout_timer.dart';
+import 'package:provider/provider.dart';
+import '../settings/settings_controller.dart';
 
 class WorkoutCountdownPage extends StatefulWidget {
   final Workout workout;
@@ -18,7 +20,7 @@ class _WorkoutCountdownPageState extends State<WorkoutCountdownPage> {
   @override
   void initState() {
     super.initState();
-    _workoutTimer = WorkoutTimer(widget.workout);
+    _workoutTimer = WorkoutTimer(widget.workout, context);
   }
 
   @override
@@ -36,188 +38,105 @@ class _WorkoutCountdownPageState extends State<WorkoutCountdownPage> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<TimerState>(
-        stream: _workoutTimer.timerState,
-        initialData: TimerState(
-          isRunning: false,
-          currentExerciseIndex: 0,
-          currentExercise: widget.workout.exercises[0],
-          currentStepIndex: 0,
-          currentStep: widget.workout.exercises[0].actions[0],
-          currentRepetition: 1,
-          remainingTime: widget.workout.exercises[0].actions[0].duration,
-          totalProgress: 0.0,
-        ),
-        builder: (context, snapshot) {
-          final state = snapshot.data!;
-          Color gradientBottom = state.currentStep.type == ActionTypes.Prepare
-              ? Colors.red
-              : Colors.blueAccent;
-          return Scaffold(
-            body: Container(
-              width: double.maxFinite,
-              height: double.maxFinite,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                  colors: [
-                    Colors.black,
-                    gradientBottom,
-                  ],
-                ),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        _formatTime(state.remainingTime),
-                        style: const TextStyle(
-                            fontSize: 82, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
+      stream: _workoutTimer.timerState,
+      initialData: TimerState(
+        isRunning: false,
+        currentExerciseIndex: 0,
+        currentExercise: widget.workout.exercises[0],
+        currentStepIndex: 0,
+        currentStep: widget.workout.exercises[0].actions[0],
+        currentRepetition: 1,
+        remainingTime: widget.workout.exercises[0].actions[0].duration,
+        totalProgress: 0.0,
+      ),
+      builder: (context, snapshot) {
+        final state = snapshot.data!;
+        double progress =
+            1 - (state.remainingTime / state.currentStep.duration);
+        Color gradientBottom = state.currentStep.type == ActionTypes.Prepare
+            ? Colors.red
+            : Color.lerp(Colors.blueAccent, Colors.blueGrey, progress) ??
+                Colors.blueAccent;
 
-                  ///
-                  ///
-                  ///
-                  ///BELOW IS  THE CODE FOR SHOWING PLAY BUTTON , SKIP BUTTON AND THE STATUS OF OTHER EXERCISES
-                  ///
-                  //
-                  // SizedBox(
-                  //   height: 100,
-                  //   child: ListView.builder(
-                  //     scrollDirection: Axis.horizontal,
-                  //     itemCount: widget.workout.exercises.length,
-                  //     itemBuilder: (context, index) {
-                  //       final isCurrentExercise =
-                  //           index == state.currentExerciseIndex;
-                  //       if (isCurrentExercise) {
-                  //         return FloatingActionButton.large(
-                  //           onPressed: () => {
-                  //             state.isRunning
-                  //                 ? _workoutTimer.pause()
-                  //                 : _workoutTimer.start()
-                  //           },
-                  //           heroTag: fabHeroTag,
-                  //           shape: const CircleBorder(),
-                  //           child: Icon(state.isRunning
-                  //               ? Icons.pause
-                  //               : Icons.play_arrow),
-                  //         );
-                  //       } else if (index == (state.currentExerciseIndex + 1)) {
-                  //         return FloatingActionButton(
-                  //           shape: const CircleBorder(),
-                  //           onPressed: () => _workoutTimer.skipToNextExercise(),
-                  //           child: const Icon(
-                  //               Icons.keyboard_double_arrow_right_sharp),
-                  //         );
-                  //       } else if (index < state.currentExerciseIndex) {
-                  //         return FloatingActionButton(
-                  //           onPressed: () => {},
-                  //           shape: const CircleBorder(),
-                  //           backgroundColor: Colors.green,
-                  //           child: const Icon(
-                  //             Icons.check,
-                  //             color: Colors.white,
-                  //           ),
-                  //         );
-                  //       } else {
-                  //         return Container(
-                  //           width: 50, // Adjust the size as needed
-                  //           height: 50,
-                  //           decoration: BoxDecoration(
-                  //             shape: BoxShape.circle,
-                  //             border: Border.all(
-                  //               color: Colors.purple,
-                  //               width: 3.0, // Customize the border width
-                  //             ),
-                  //           ),
-                  //         );
-                  //       }
-                  //     },
-                  //   ),
-                  // ),
-                  // SizedBox(
-                  //     height: 250,
-                  //     child: ListView.builder(
-                  //         padding: const EdgeInsets.all(10),
-                  //         scrollDirection: Axis.horizontal,
-                  //         itemCount: widget.workout.exercises.length,
-                  //         itemBuilder: (context, index) {
-                  //           if (state.currentExerciseIndex <= index) {
-                  //             return Padding(
-                  //               padding: const EdgeInsets.all(8.0),
-                  //               child: Container(
-                  //                 width: 50, // Adjust the size as needed
-                  //                 height: 50,
-                  //                 decoration: BoxDecoration(
-                  //                   shape: BoxShape.circle,
-                  //                   border: Border.all(
-                  //                     color: Colors.green,
-                  //                     width: 3.0, // Customize the border width
-                  //                   ),
-                  //                 ),
-                  //               ),
-                  //             );
-                  //           } else {
-                  //             return Container(
-                  //               width: 50, // Adjust the size as needed
-                  //               height: 50,
-                  //
-                  //               decoration: BoxDecoration(
-                  //                 shape: BoxShape.circle,
-                  //                 color: Colors.green,
-                  //                 border: Border.all(
-                  //                   color: Colors.green,
-                  //                   width: 3.0, // Customize the border width
-                  //                 ),
-                  //               ),
-                  //
-                  //               child: const Icon(
-                  //                 Icons.check,
-                  //                 color: Colors.white,
-                  //               ),
-                  //             );
-                  //           }
-                  //         }))
+        return Scaffold(
+          body: Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.bottomCenter,
+                end: Alignment.topCenter,
+                colors: [
+                  Colors.black,
+                  gradientBottom,
                 ],
               ),
             ),
-            floatingActionButton: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  child: FloatingActionButton.large(
-                    onPressed: () => {
-                      state.isRunning
-                          ? _workoutTimer.pause()
-                          : _workoutTimer.start()
-                    },
-                    heroTag: fabHeroTag,
-                    shape: const CircleBorder(),
-                    child:
-                        Icon(state.isRunning ? Icons.pause : Icons.play_arrow),
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                  child: FloatingActionButton(
-                    shape: const CircleBorder(),
-                    onPressed: () => _workoutTimer.skipToNextExercise(),
-                    child: const Icon(Icons.keyboard_double_arrow_right_sharp),
+                Expanded(
+                  child: Center(
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        SizedBox(
+                          width: 300,
+                          height: 300,
+                          child: CircularProgressIndicator(
+                            value: 1 - progress,
+                            strokeWidth: 10,
+                            backgroundColor: Colors.grey.withOpacity(0.3),
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        ),
+                        Text(
+                          _formatTime(state.remainingTime),
+                          style: const TextStyle(
+                            fontSize: 82,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
             ),
-            floatingActionButtonLocation:
-                FloatingActionButtonLocation.centerDocked,
-          );
-        });
+          ),
+          floatingActionButton: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                child: FloatingActionButton.large(
+                  onPressed: () => {
+                    state.isRunning
+                        ? _workoutTimer.pause()
+                        : _workoutTimer.start()
+                  },
+                  heroTag: fabHeroTag,
+                  shape: const CircleBorder(),
+                  child: Icon(state.isRunning ? Icons.pause : Icons.play_arrow),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                child: FloatingActionButton(
+                  shape: const CircleBorder(),
+                  onPressed: () => _workoutTimer.skipToNextExercise(),
+                  child: const Icon(Icons.keyboard_double_arrow_right_sharp),
+                ),
+              ),
+            ],
+          ),
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerDocked,
+        );
+      },
+    );
   }
 }

@@ -20,7 +20,7 @@ class _WorkoutTimerPageState extends State<WorkoutTimerPage> {
   @override
   void initState() {
     super.initState();
-    _workoutTimer = WorkoutTimer(widget.workout);
+    _workoutTimer = WorkoutTimer(widget.workout, context);
   }
 
   @override

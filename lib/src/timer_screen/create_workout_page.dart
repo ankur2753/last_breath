@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:hive/hive.dart';
+import 'package:last_breath/src/components/common_utils.dart';
 import 'package:last_breath/src/components/expandable_fab.dart';
+import 'package:last_breath/src/timer_screen/workout_db_service.dart';
 import 'package:uuid/uuid.dart';
 import 'workout_model.dart';
 import 'create_Exercise_Page.dart';
@@ -21,7 +24,11 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
   void _addExercise() async {
     final exercise = await Navigator.push<Exercise>(
       context,
-      MaterialPageRoute(builder: (context) => CreateExercisePage()),
+      MaterialPageRoute(
+        builder: (context) => CreateExercisePage(),
+        fullscreenDialog: true,
+        maintainState: true,
+      ),
     );
     if (exercise != null) {
       setState(() {
@@ -38,8 +45,7 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
         name: _name,
         exercises: _exercises,
       );
-      final box = Hive.box<Workout>('workouts');
-      box.add(workout);
+      WorkoutDatabase.addWorkout(workout);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Workout Saved')),
       );
@@ -66,31 +72,102 @@ class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
                   value!.isEmpty ? 'Please enter a name' : null,
               onSaved: (value) => _name = value!,
             ),
-            SizedBox(height: 20),
-            Text('Exercises:', style: Theme.of(context).textTheme.titleLarge),
-            ..._exercises.map((exercise) => ListTile(
-                  title: Text('${exercise.actions.length} steps'),
-                )),
-            ElevatedButton(
-              onPressed: _addExercise,
-              child: Text('Add Exercise'),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _saveWorkout,
-              child: Text('Add Workout'),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10.0),
+              child: SizedBox(
+                height: 900,
+                child: ListView.builder(
+                  itemCount: _exercises.isEmpty ? 1 : _exercises.length,
+                  itemBuilder: (context, index) {
+                    if (_exercises.isEmpty) {
+                      return const Card(
+                        color: Colors.blueGrey,
+                        child: Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Center(
+                            child: Text(
+                              "NO EXERCISE SET FOUND, \n try adding exercises by clicking on the + icon",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+                    final exercise = _exercises[index];
+                    return Card(
+                      color: Colors.grey[800],
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Column(
+                          children: [
+                            ...exercise.actions.asMap().entries.map((entry) {
+                              final action = entry.value;
+                              return Container(
+                                margin: const EdgeInsets.only(bottom: 8),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: action.type == ActionTypes.Exercise
+                                      ? Colors.green
+                                      : Colors.red,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(action.type.name,
+                                        style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold)),
+                                    Text(formatTime(action.duration),
+                                        style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold)),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                            Container(
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text('Repeat',
+                                      style: TextStyle(color: Colors.white)),
+                                  Text('x${exercise.repeat}',
+                                      style:
+                                          const TextStyle(color: Colors.white)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
             ),
           ],
         ),
       ),
+      floatingActionButtonLocation: ExpandableFab.location,
       floatingActionButton: ExpandableFab(
-        fabs: [
-          FloatingActionButton(onPressed: () {}, child: const Icon(Icons.add)),
-          FloatingActionButton(onPressed: () {}, child: const Icon(Icons.edit)),
-        ],
-        labels: const [
-          'Add',
-          'Edit',
+        initialOpen: false,
+        overlayStyle: const ExpandableFabOverlayStyle(blur: 5),
+        children: [
+          FloatingActionButton(
+            heroTag: null,
+            onPressed: _addExercise,
+            child: const Icon(Icons.add),
+          ),
+          FloatingActionButton(
+            heroTag: null,
+            onPressed: _saveWorkout,
+            child: const Icon(Icons.save),
+          ),
         ],
       ),
     );

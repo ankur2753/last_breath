@@ -1,4 +1,5 @@
 import 'package:hive/hive.dart';
+
 import 'workout_model.dart';
 
 class WorkoutDatabase {
@@ -28,6 +29,23 @@ class WorkoutDatabase {
   static Future<Workout?> getWorkout(String id) async {
     final box = await _openBox();
     return box.get(id);
+  }
+
+  static Future<Workout> getDefaultWorkout() async {
+    final box = await _openBox();
+    return box.get("defaultWorkout") ??
+        Workout(id: "Default", name: "Default Workout", exercises: [
+          Exercise(actions: [
+            ExerciseSteps(type: ActionTypes.Prepare, duration: 5),
+          ], repeat: 0),
+          Exercise(
+            actions: [
+              ExerciseSteps(type: ActionTypes.Exercise, duration: 25),
+              ExerciseSteps(type: ActionTypes.Rest, duration: 15),
+            ],
+            repeat: 1,
+          ),
+        ]);
   }
 
   // Update a workout

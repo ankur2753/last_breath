@@ -1,8 +1,10 @@
 import 'dart:async';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:last_breath/src/settings/settings_controller.dart';
 import 'package:provider/provider.dart';
+
 import 'workout_model.dart';
 
 class WorkoutTimer {
@@ -31,11 +33,6 @@ class WorkoutTimer {
       _isRunning = true;
       _startCountdown();
     }
-  }
-
-  void skipToNextExercise() {
-    _currentExerciseIndex++;
-    _emitState();
   }
 
   void _startCountdown() {
@@ -81,35 +78,38 @@ class WorkoutTimer {
       }
     } else {
       _playSound('beep');
-      _moveToNextStep();
+      if (_currentExerciseIndex < _exercises.length - 1) {
+        moveToNextStep();
+      }
     }
     _emitState();
   }
 
-  void _moveToNextStep() {
+  void moveToNextStep() {
     _currentStepIndex++;
     if (_currentStepIndex >= _exercises[_currentExerciseIndex].actions.length) {
+      //all steps in current exercise are done
       _currentStepIndex = 0;
       _currentRepetition++;
+      //TODO: ADD some way to utilize the rest between sets here.
       if (_currentRepetition > _exercises[_currentExerciseIndex].repeat) {
+        //all the repetition is completed
         _moveToNextExercise();
       }
     }
-    if (_currentExerciseIndex < _exercises.length) {
-      _remainingTime =
-          _exercises[_currentExerciseIndex].actions[_currentStepIndex].duration;
-    } else {
-      stop(); // Workout completed
-    }
+    _emitState();
   }
 
   void _moveToNextExercise() {
     _currentExerciseIndex++;
     _currentRepetition = 1;
+    _currentStepIndex = 0;
     if (_currentExerciseIndex < _exercises.length) {
-      _currentStepIndex = 0;
       _remainingTime =
           _exercises[_currentExerciseIndex].actions[_currentStepIndex].duration;
+    } else {
+      _isRunning = false;
+      _timer?.cancel();
     }
   }
 
@@ -127,6 +127,7 @@ class WorkoutTimer {
 
   void _emitState({int? countdownTime}) {
     if (!_stateController.isClosed) {
+      double progress = _calculateTotalProgress();
       _stateController.add(TimerState(
         isRunning: _isRunning,
         currentExerciseIndex: _currentExerciseIndex,
@@ -136,7 +137,7 @@ class WorkoutTimer {
             _exercises[_currentExerciseIndex].actions[_currentStepIndex],
         currentRepetition: _currentRepetition,
         remainingTime: _remainingTime,
-        totalProgress: _calculateTotalProgress(),
+        totalProgress: progress,
         countdownTime: countdownTime,
       ));
     }
@@ -147,12 +148,11 @@ class WorkoutTimer {
     int elapsedTime = 0;
 
     for (int i = 0; i < _currentExerciseIndex; i++) {
-      elapsedTime += _exercises[i].totalDuration;
+      elapsedTime += _exercises[i].totalDuration * _exercises[i].repeat;
     }
 
-    elapsedTime += (_exercises[_currentExerciseIndex].totalDuration ~/
-            _exercises[_currentExerciseIndex].repeat) *
-        (_currentRepetition - 1);
+    elapsedTime += (_exercises[_currentExerciseIndex].totalDuration *
+        (_currentRepetition - 1));
 
     for (int i = 0; i < _currentStepIndex; i++) {
       elapsedTime += _exercises[_currentExerciseIndex].actions[i].duration;
@@ -162,7 +162,7 @@ class WorkoutTimer {
         _exercises[_currentExerciseIndex].actions[_currentStepIndex].duration -
             _remainingTime;
 
-    return elapsedTime / totalTime;
+    return totalTime > 0 ? elapsedTime / totalTime : 0.0;
   }
 
   Future<void> _playSound(String soundName) async {
@@ -190,6 +190,7 @@ class TimerState {
   final int remainingTime;
   final double totalProgress;
   final int? countdownTime;
+  final int restBetweenSets;
 
   TimerState({
     required this.isRunning,
@@ -201,5 +202,6 @@ class TimerState {
     required this.remainingTime,
     required this.totalProgress,
     this.countdownTime,
+    this.restBetweenSets = 0,
   });
 }

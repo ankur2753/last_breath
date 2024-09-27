@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:last_breath/src/constants/strings_values.dart';
+import 'package:last_breath/src/settings/settings_page.dart';
+
 import '../components/common_utils.dart';
 import '../components/timer.dart';
 import 'workout_model.dart';
@@ -8,13 +10,13 @@ import 'workout_timer.dart';
 class WorkoutTimerPage extends StatefulWidget {
   final Workout workout;
 
-  WorkoutTimerPage({Key? key, required this.workout}) : super(key: key);
+  const WorkoutTimerPage({super.key, required this.workout});
 
   @override
-  _WorkoutTimerPageState createState() => _WorkoutTimerPageState();
+  WorkoutTimerPageState createState() => WorkoutTimerPageState();
 }
 
-class _WorkoutTimerPageState extends State<WorkoutTimerPage> {
+class WorkoutTimerPageState extends State<WorkoutTimerPage> {
   late WorkoutTimer _workoutTimer;
 
   @override
@@ -29,9 +31,71 @@ class _WorkoutTimerPageState extends State<WorkoutTimerPage> {
     super.dispose();
   }
 
+  Widget getActionContainer(ExerciseSteps step) {
+    bool noCard =
+        step.type == ActionTypes.Prepare || step.type == ActionTypes.CoolDown;
+    double padding = noCard ? 18.0 : 8.0;
+    EdgeInsets margin = noCard
+        ? const EdgeInsets.symmetric(vertical: 10)
+        : const EdgeInsets.only(top: 8);
+    return Container(
+      margin: margin,
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: padding),
+      decoration: BoxDecoration(
+        color: getBoxColor(step.type),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(step.type.name,
+              style: const TextStyle(
+                  color: Colors.white, fontWeight: FontWeight.bold)),
+          Text(formatTime(step.duration),
+              style: const TextStyle(
+                  color: Colors.white, fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+
+  Widget getExerciseContainer(Exercise exercise) {
+    if (exercise.actions.length == 1) {
+      return getActionContainer(exercise.actions.first);
+    }
+    return Card(
+      color: Colors.grey[800],
+      child: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Column(
+          children: [
+            ...exercise.actions.asMap().entries.map((entry) {
+              return getActionContainer(entry.value);
+            }),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 5.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Repeat', style: TextStyle(color: Colors.white)),
+                  Text(
+                    'x${exercise.repeat}',
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
+      drawer: const Drawer(child: SettingsPage()),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -56,73 +120,7 @@ class _WorkoutTimerPageState extends State<WorkoutTimerPage> {
                       itemCount: widget.workout.exercises.length,
                       itemBuilder: (context, index) {
                         final exercise = widget.workout.exercises[index];
-                        final isCurrentExercise =
-                            index == state.currentExerciseIndex;
-                        return Card(
-                          color: Colors.grey[800],
-                          child: Padding(
-                            padding: const EdgeInsets.all(10.0),
-                            child: Column(
-                              children: [
-                                ...exercise.actions
-                                    .asMap()
-                                    .entries
-                                    .map((entry) {
-                                  final actionIndex = entry.key;
-                                  final action = entry.value;
-                                  final isCurrentStep = isCurrentExercise &&
-                                      actionIndex == state.currentStepIndex;
-                                  return Container(
-                                    margin: const EdgeInsets.only(bottom: 8),
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 16, vertical: 8),
-                                    decoration: BoxDecoration(
-                                      color: action.type == ActionTypes.Exercise
-                                          ? Colors.green
-                                          : Colors.red,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(action.type.name,
-                                            style: const TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold)),
-                                        Text(
-                                            isCurrentStep
-                                                ? formatTime(
-                                                    state.remainingTime)
-                                                : formatTime(action.duration),
-                                            style: const TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold)),
-                                      ],
-                                    ),
-                                  );
-                                }).toList(),
-                                Container(
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      const Text('Repeat',
-                                          style:
-                                              TextStyle(color: Colors.white)),
-                                      Text(
-                                          isCurrentExercise
-                                              ? '${state.currentRepetition}/${exercise.repeat}'
-                                              : 'x${exercise.repeat}',
-                                          style: const TextStyle(
-                                              color: Colors.white)),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
+                        return getExerciseContainer(exercise);
                       },
                     ),
                   ),

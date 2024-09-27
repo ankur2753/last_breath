@@ -1,12 +1,16 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:last_breath/src/components/add_workout_page.dart';
 import 'package:last_breath/src/constants/colors.dart';
 import 'package:last_breath/src/settings/settings_controller.dart';
 import 'package:last_breath/src/settings/settings_page.dart';
+import 'package:last_breath/src/timer_screen/create_workout_page.dart';
 import 'package:last_breath/src/timer_screen/workoutCompleted.dart';
 import 'package:last_breath/src/timer_screen/workout_home_page.dart';
+import 'package:last_breath/src/timer_screen/workout_model.dart';
+import 'package:last_breath/src/timer_screen/workout_timer_page.dart';
 import 'package:provider/provider.dart';
 
 /// The Widget that configures your application.
@@ -55,30 +59,48 @@ class MyApp extends StatelessWidget {
         initialRoute: '/home',
         onGenerateRoute: (RouteSettings settings) {
           switch (settings.name) {
-            // case '/workout':
-            //   return MaterialPageRoute(
-            //     builder: (context) => const AddWorkout(),
-            //   );
             case '/completed':
               return MaterialPageRoute(
-                builder: (context) => const WorkoutCompletedPage(),
-              );
+                  builder: (context) => const WorkoutCompletedPage());
             case '/settings':
               return MaterialPageRoute(
-                builder: (context) => const SettingsPage(), // Fallback route
-              );
-            // case '/saveWorkout':
-            //   return MaterialPageRoute(
-            //       builder: (context) => const AddWorkout());
+                  builder: (context) => const SettingsPage());
+            case '/workout':
+              return MaterialPageRoute(builder: (context) => const HomePage());
+            case '/create':
+              return MaterialPageRoute(
+                  builder: (context) => TimerCreationPage(
+                        name: Random().nextInt(10000).toString(),
+                      ));
             case '/home':
             default:
               return MaterialPageRoute(
-                builder: (context) => HomePage(), // Fallback route
+                builder: (context) => WorkoutTimerPage(
+                  workout: Workout(
+                    id: "Default",
+                    name: "Default Workout",
+                    exercises: [
+                      Exercise(actions: [
+                        ExerciseSteps(type: ActionTypes.Prepare, duration: 15),
+                      ], repeat: 1),
+                      Exercise(
+                        actions: [
+                          ExerciseSteps(
+                              type: ActionTypes.Exercise, duration: 25),
+                          ExerciseSteps(type: ActionTypes.Rest, duration: 10),
+                        ],
+                        repeat: 1,
+                        restBetweenSets: 20,
+                      ),
+                      Exercise(actions: [
+                        ExerciseSteps(type: ActionTypes.CoolDown, duration: 5),
+                      ], repeat: 1),
+                    ],
+                  ),
+                ),
               );
           }
         },
-        // Define a function to handle named routes in order to support
-        // Flutter web url navigation and deep linking.
       );
     });
   }

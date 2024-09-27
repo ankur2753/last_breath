@@ -185,6 +185,8 @@ class ActionTypesAdapter extends TypeAdapter<ActionTypes> {
         return ActionTypes.Exercise;
       case 2:
         return ActionTypes.Rest;
+      case 3:
+        return ActionTypes.CoolDown;
       default:
         return ActionTypes.Prepare;
     }
@@ -201,6 +203,9 @@ class ActionTypesAdapter extends TypeAdapter<ActionTypes> {
         break;
       case ActionTypes.Rest:
         writer.writeByte(2);
+        break;
+      case ActionTypes.CoolDown:
+        writer.writeByte(3);
         break;
     }
   }

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:last_breath/src/components/common_utils.dart';
 import 'package:last_breath/src/constants/strings_values.dart';
+
 import '../timer_screen/workout_model.dart';
 import '../timer_screen/workout_timer.dart';
-import 'package:provider/provider.dart';
-import '../settings/settings_controller.dart';
 
 class WorkoutCountdownPage extends StatefulWidget {
   final Workout workout;
@@ -51,14 +51,23 @@ class _WorkoutCountdownPageState extends State<WorkoutCountdownPage> {
       ),
       builder: (context, snapshot) {
         final state = snapshot.data!;
+        print("tp${state.totalProgress}");
+        if (state.totalProgress >= 1) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.pushReplacementNamed(context, "/completed");
+          });
+        }
         double progress =
             1 - (state.remainingTime / state.currentStep.duration);
-        Color gradientBottom = state.currentStep.type == ActionTypes.Prepare
-            ? Colors.red
-            : Color.lerp(Colors.blueAccent, Colors.blueGrey, progress) ??
-                Colors.blueAccent;
+        Color gradientBottom = getBoxColor(state.currentStep.type);
 
         return Scaffold(
+          extendBodyBehindAppBar: true,
+          appBar: AppBar(
+            title: Text(state.currentStep.type.toShortString()),
+            centerTitle: true,
+            backgroundColor: Colors.transparent,
+          ),
           body: Container(
             width: double.infinity,
             height: double.infinity,
@@ -75,6 +84,10 @@ class _WorkoutCountdownPageState extends State<WorkoutCountdownPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                LinearProgressIndicator(
+                  value: state.totalProgress,
+                  minHeight: 5,
+                ),
                 Expanded(
                   child: Center(
                     child: Stack(
@@ -87,8 +100,8 @@ class _WorkoutCountdownPageState extends State<WorkoutCountdownPage> {
                             value: 1 - progress,
                             strokeWidth: 10,
                             backgroundColor: Colors.grey.withOpacity(0.3),
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                                Colors.white),
                           ),
                         ),
                         Text(
@@ -111,6 +124,15 @@ class _WorkoutCountdownPageState extends State<WorkoutCountdownPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                child: FloatingActionButton(
+                  heroTag: "reset",
+                  shape: const CircleBorder(),
+                  onPressed: () => _workoutTimer.stop(),
+                  child: const Icon(Icons.restart_alt),
+                ),
+              ),
+              Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 child: FloatingActionButton.large(
                   onPressed: () => {
@@ -127,7 +149,8 @@ class _WorkoutCountdownPageState extends State<WorkoutCountdownPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                 child: FloatingActionButton(
                   shape: const CircleBorder(),
-                  onPressed: () => _workoutTimer.skipToNextExercise(),
+                  heroTag: "skip",
+                  onPressed: () => _workoutTimer.moveToNextStep(),
                   child: const Icon(Icons.keyboard_double_arrow_right_sharp),
                 ),
               ),

@@ -1,175 +1,184 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
-import 'package:hive/hive.dart';
-import 'package:last_breath/src/components/common_utils.dart';
-import 'package:last_breath/src/components/expandable_fab.dart';
-import 'package:last_breath/src/timer_screen/workout_db_service.dart';
-import 'package:uuid/uuid.dart';
-import 'workout_model.dart';
-import 'create_Exercise_Page.dart';
+import 'dart:math';
 
-/*
-* THIS REUSABLE PAGE FOR CREATING AND EDITING A WORKOUT AS A WHOLE
-* */
-class CreateWorkoutPage extends StatefulWidget {
+import 'package:flutter/material.dart';
+import 'package:last_breath/src/timer_screen/workout_db_service.dart';
+import 'package:numberpicker/numberpicker.dart';
+
+import 'workout_model.dart';
+
+class TimerCreationPage extends StatefulWidget {
+  final int prepare;
+  final int work;
+  final int rest;
+  final int cycles;
+  final int sets;
+  final int restBetweenSets;
+  final int coolDown;
+  final String name;
+  const TimerCreationPage({
+    super.key,
+    this.restBetweenSets = 1,
+    this.coolDown = 1,
+    this.cycles = 10,
+    this.prepare = 10,
+    this.work = 10,
+    this.rest = 1,
+    this.sets = 1,
+    required this.name,
+  });
+
   @override
-  _CreateWorkoutPageState createState() => _CreateWorkoutPageState();
+  TimerCreationPageState createState() => TimerCreationPageState();
 }
 
-class _CreateWorkoutPageState extends State<CreateWorkoutPage> {
-  final _formKey = GlobalKey<FormState>();
-  String _name = '';
-  List<Exercise> _exercises = [];
+class TimerCreationPageState extends State<TimerCreationPage> {
+  int prepare = 10;
+  int work = 1;
+  int rest = 1;
+  int cycles = 10;
+  int sets = 3;
+  int restBetweenSets = 1;
+  int coolDown = 1;
+  String name = "";
 
-  void _addExercise() async {
-    final exercise = await Navigator.push<Exercise>(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CreateExercisePage(),
-        fullscreenDialog: true,
-        maintainState: true,
-      ),
-    );
-    if (exercise != null) {
-      setState(() {
-        _exercises.add(exercise);
-      });
-    }
-  }
-
-  void _saveWorkout() {
-    if (_formKey.currentState!.validate() && _exercises.isNotEmpty) {
-      _formKey.currentState!.save();
-      final workout = Workout(
-        id: Uuid().v4(), // Generate a unique ID
-        name: _name,
-        exercises: _exercises,
-      );
-      WorkoutDatabase.addWorkout(workout);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Workout Saved')),
-      );
-      Navigator.pop(context);
-    } else if (_exercises.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please add at least one exercise')),
-      );
-    }
+  @override
+  void initState() {
+    //get values from parent and set it for edit case.
+    prepare = widget.prepare;
+    work = widget.work;
+    rest = widget.rest;
+    cycles = widget.cycles;
+    sets = widget.sets;
+    restBetweenSets = widget.restBetweenSets;
+    coolDown = widget.coolDown;
+    name = widget.name;
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Create Workout')),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: EdgeInsets.all(16.0),
-          children: [
-            TextFormField(
-              decoration: InputDecoration(labelText: 'Workout Name'),
-              validator: (value) =>
-                  value!.isEmpty ? 'Please enter a name' : null,
-              onSaved: (value) => _name = value!,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10.0),
-              child: SizedBox(
-                height: 900,
-                child: ListView.builder(
-                  itemCount: _exercises.isEmpty ? 1 : _exercises.length,
-                  itemBuilder: (context, index) {
-                    if (_exercises.isEmpty) {
-                      return const Card(
-                        color: Colors.blueGrey,
-                        child: Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Center(
-                            child: Text(
-                              "NO EXERCISE SET FOUND, \n try adding exercises by clicking on the + icon",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-                    final exercise = _exercises[index];
-                    return Card(
-                      color: Colors.grey[800],
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Column(
-                          children: [
-                            ...exercise.actions.asMap().entries.map((entry) {
-                              final action = entry.value;
-                              return Container(
-                                margin: const EdgeInsets.only(bottom: 8),
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: action.type == ActionTypes.Exercise
-                                      ? Colors.green
-                                      : Colors.red,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(action.type.name,
-                                        style: const TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold)),
-                                    Text(formatTime(action.duration),
-                                        style: const TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold)),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                            Container(
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text('Repeat',
-                                      style: TextStyle(color: Colors.white)),
-                                  Text('x${exercise.repeat}',
-                                      style:
-                                          const TextStyle(color: Colors.white)),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-          ],
+      appBar: AppBar(
+        title: const Text('Timer'),
+        automaticallyImplyLeading: true,
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16.0),
+        children: [
+          Text(
+            '${prepare + work + rest} sec • ${cycles * sets} reps • $cycles intervals • $sets sets',
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 20),
+          _buildTimerRow('Prepare', prepare, Icons.accessibility_new),
+          _buildTimerRow('Work', work, Icons.fitness_center),
+          _buildTimerRow('Rest', rest, Icons.timer),
+          _buildTimerRow('Cycles', cycles, Icons.loop),
+          _buildTimerRow('Sets', sets, Icons.repeat),
+          _buildTimerRow('Rest between sets', restBetweenSets, Icons.hotel),
+          _buildTimerRow('Cool down', coolDown, Icons.ac_unit),
+        ],
+      ),
+      bottomNavigationBar: BottomAppBar(
+        color: Colors.transparent,
+        child: ElevatedButton(
+          onPressed: _startWorkout,
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size(200, 50),
+          ),
+          child: const Text('SAVE'),
         ),
       ),
-      floatingActionButtonLocation: ExpandableFab.location,
-      floatingActionButton: ExpandableFab(
-        initialOpen: false,
-        overlayStyle: const ExpandableFabOverlayStyle(blur: 5),
+    );
+  }
+
+  Widget _buildTimerRow(String label, int givenValue, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      child: Row(
         children: [
-          FloatingActionButton(
-            heroTag: null,
-            onPressed: _addExercise,
-            child: const Icon(Icons.add),
+          Icon(icon),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(label),
           ),
-          FloatingActionButton(
-            heroTag: null,
-            onPressed: _saveWorkout,
-            child: const Icon(Icons.save),
+          NumberPicker(
+            axis: Axis.horizontal,
+            value: givenValue,
+            itemWidth: 60,
+            minValue: 1,
+            maxValue: 100,
+            infiniteLoop: true,
+            selectedTextStyle: TextStyle(
+              color: Colors.red,
+              fontWeight: FontWeight.w900,
+              fontSize: 18,
+            ),
+            textStyle: TextStyle(
+              fontSize: 10,
+            ),
+            onChanged: (value) => _updateValue(label, value),
           ),
         ],
       ),
     );
+  }
+
+  void _updateValue(String label, int newValue) {
+    setState(() {
+      switch (label) {
+        case 'Prepare':
+          prepare = newValue;
+          break;
+        case 'Work':
+          work = newValue;
+          break;
+        case 'Rest':
+          rest = newValue;
+          break;
+        case 'Cycles':
+          cycles = newValue;
+          break;
+        case 'Sets':
+          sets = newValue;
+          break;
+        case 'Rest between sets':
+          restBetweenSets = newValue;
+          break;
+        case 'Cool down':
+          coolDown = newValue;
+          break;
+      }
+    });
+  }
+
+  void _startWorkout() {
+    final workout = Workout(
+      name: name,
+      id: Random().nextInt(5000).toString(),
+      exercises: [
+        Exercise(
+          repeat: 1,
+          actions: [
+            ExerciseSteps(type: ActionTypes.Prepare, duration: prepare),
+          ],
+        ),
+        Exercise(
+          repeat: sets,
+          actions: [
+            ExerciseSteps(type: ActionTypes.Exercise, duration: work),
+            ExerciseSteps(type: ActionTypes.Rest, duration: rest),
+          ],
+          restBetweenSets: restBetweenSets,
+        ),
+        Exercise(
+          repeat: 1,
+          actions: [
+            ExerciseSteps(type: ActionTypes.CoolDown, duration: coolDown),
+          ],
+        ),
+      ],
+    );
+    WorkoutDatabase.addWorkout(workout);
   }
 }

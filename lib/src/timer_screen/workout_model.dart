@@ -10,6 +10,8 @@ enum ActionTypes {
   Exercise,
   @HiveField(2)
   Rest,
+  @HiveField(3)
+  CoolDown,
 }
 
 extension ParseToString on ActionTypes {
@@ -40,10 +42,14 @@ class Exercise {
   @HiveField(2)
   int repeat;
 
+  @HiveField(3)
+  int restBetweenSets;
+
   Exercise({
     // required this.name,
     required this.actions,
     required this.repeat,
+    this.restBetweenSets = 10,
   });
 
   int get totalDuration =>
